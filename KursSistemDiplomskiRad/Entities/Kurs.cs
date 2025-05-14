@@ -9,5 +9,6 @@
         // Navigacione osobine
         public ICollection<Student> Studenti { get; set; } = new List<Student>();
         public ICollection<Lekcije> Lekcije { get; set; } = new List<Lekcije>();
+        public ICollection<StudentKurs> StudentKursevi { get; set; } = new List<StudentKurs>();
     }
 }
