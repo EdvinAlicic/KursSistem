@@ -1,14 +1,26 @@
 ﻿namespace KursSistemDiplomskiRad.DTOs
 {
-    public class KursDto
+    public class KursReadDto
     {
         public int Id { get; set; }
-        public string Naziv { get; set; } = string.Empty;
-        public string Opis { get; set; } = string.Empty;
-        public DateTime DatumPocetka { get; set; }
-        public DateTime DatumZavrsetka { get; set; }
-        public int BrojPolaznika { get; set; }
-        public List<LekcijeDto> Lekcije { get; set; } = new List<LekcijeDto>();
-        public List<StudentDto> Polaznici { get; set; } = new List<StudentDto>();
+        public string Naziv { get; set; }
+        public string Opis { get; set; }
+        public string StatusKursa { get; set; } // Aktivno, Neaktivno
+        public List<string> Studenti { get; set; } // Lista imena studenata prijavljenih na kurs
+        public List<LekcijaReadDto> Lekcije { get; set; } // Lista lekcija u kursu
+    }
+
+    public class KursCreateDto
+    {
+        public string Naziv { get; set; }
+        public string Opis { get; set; }
+        public string StatusKursa { get; set; }
+    }
+
+    public class KursUpdateDto
+    {
+        public string Naziv { get; set; }
+        public string Opis { get; set; }
+        public string StatusKursa { get; set; }
     }
 }

@@ -2,14 +2,19 @@
 
 namespace KursSistemDiplomskiRad.DTOs
 {
-    public class LekcijeDto
+    public class LekcijaReadDto
     {
         public int Id { get; set; }
         public string Naziv { get; set; }
         public string Opis { get; set; }
+        public int KursId { get; set; } // ID kursa kojem lekcija pripada
+    }
+
+    public class LekcijaCreateDto
+    {
+        public string Naziv { get; set; }
+        public string Opis { get; set; }
         public byte[] MedijskiSadrzaj { get; set; }
-        public int KursId { get; set; } // FK
-        // Navigacione osobine
-        public Kurs Kurs { get; set; } // FK
+        public int KursId { get; set; }
     }
 }
