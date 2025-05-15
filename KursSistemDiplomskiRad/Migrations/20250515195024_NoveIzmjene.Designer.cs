@@ -4,6 +4,7 @@ using KursSistemDiplomskiRad.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KursSistemDiplomskiRad.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250515195024_NoveIzmjene")]
+    partial class NoveIzmjene
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,9 +61,9 @@ namespace KursSistemDiplomskiRad.Migrations
                     b.Property<int>("KursId")
                         .HasColumnType("int");
 
-                    b.Property<string>("MedijskiSadrzaj")
+                    b.Property<byte[]>("MedijskiSadrzaj")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Naziv")
                         .IsRequired()
@@ -88,6 +91,9 @@ namespace KursSistemDiplomskiRad.Migrations
                     b.Property<string>("Adresa")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BrojIndeksa")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()

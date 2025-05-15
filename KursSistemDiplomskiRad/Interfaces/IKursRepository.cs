@@ -4,10 +4,10 @@ namespace KursSistemDiplomskiRad.Interfaces
 {
     public interface IKursRepository
     {
-        Task<List<KursReadDto>> GetAllKurseviAsync();
-        Task<KursReadDto> GetKursByIdAsync(int id);
-        Task<KursCreateDto> CreateKursAsync(KursCreateDto kursCreatDto);
-        Task<KursUpdateDto> UpdateKursAsync(int id, KursUpdateDto kursUpdateDto);
-        Task DeleteKursAsync(int id);
+        Task<IEnumerable<KursDto>> GetAllKurseviAsync(); // Vraća kolekciju kurseva
+        Task<KursDto> GetKursByIdAsync(int id); // Vraća jedan kurs prema ID-u
+        Task<KursDto> AddKursAsync(KursCreateDto kurs); // Dodaje novi kurs
+        Task<KursDto> UpdateKursAsync(int id, KursDto kurs); // Ažurira postojeći kurs
+        Task<KursDto> DeleteKursAsync(int id); // Briše kurs prema ID-u
     }
 }
