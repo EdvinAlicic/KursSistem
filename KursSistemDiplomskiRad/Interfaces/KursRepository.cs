@@ -17,7 +17,11 @@ namespace KursSistemDiplomskiRad.Interfaces
         }
         public async Task<IEnumerable<KursDto>> GetAllKurseviAsync()
         {
-            var kursevi = await _dataContext.Kursevi.ToListAsync();
+            var kursevi = await _dataContext.Kursevi
+                .Include(k => k.Lekcije)
+                .Include(k => k.StudentKursevi)
+                    .ThenInclude(sk => sk.Student)
+                .ToListAsync();
             return _mapper.Map<IEnumerable<KursDto>>(kursevi);
         }
 
@@ -52,7 +56,7 @@ namespace KursSistemDiplomskiRad.Interfaces
             }
         }
 
-        public async Task<KursDto> UpdateKursAsync(int id, KursDto updatedKurs)
+        public async Task<KursDto> UpdateKursAsync(int id, KursUpdateDto updatedKurs)
         {
             var kursEntity = await _dataContext.Kursevi.FindAsync(id);
             if(kursEntity == null)

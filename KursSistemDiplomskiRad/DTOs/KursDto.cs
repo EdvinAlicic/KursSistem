@@ -10,12 +10,18 @@
         public List<LekcijaDto> Lekcije { get; set; } // Lista lekcija u kursu
     }
 
+    public class KursUpdateDto
+    {
+        public string Naziv { get; set; }
+        public string Opis { get; set; }
+        public string StatusKursa { get; set; }
+    }
+
     public class KursCreateDto
     {
         public string Naziv { get; set; }
         public string Opis { get; set; }
         public string StatusKursa { get; set; }
-        public List<LekcijaCreateDto> Lekcije { get; set; }
     }
 
     public class LekcijaCreateDto

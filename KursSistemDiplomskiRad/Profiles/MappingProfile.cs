@@ -43,6 +43,9 @@ namespace KursSistemDiplomskiRad.Profiles
 
             // LekcijaCreateDto -> Lekcije (za kreiranje/izmenu)
             CreateMap<LekcijaCreateDto, Lekcije>();
+
+            // KursUpdateDto -> Kurs (za kreiranje/izmenu)
+            CreateMap<KursUpdateDto, Kurs>();
         }
     }
 }

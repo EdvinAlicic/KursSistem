@@ -14,6 +14,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("KursSistemConnection")));
 builder.Services.AddTransient<IKursRepository, KursRepository>();
+builder.Services.AddTransient<ILekcijeRepository, LekcijeRepository>();
 
 var app = builder.Build();
 

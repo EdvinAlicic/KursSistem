@@ -32,6 +32,7 @@ namespace KursSistemDiplomskiRad.Controllers
             }
             return Ok(kurs);
         }
+
         [HttpPost]
         public async Task<IActionResult> AddKurs([FromBody] KursCreateDto kurs)
         {
@@ -41,6 +42,28 @@ namespace KursSistemDiplomskiRad.Controllers
                 return BadRequest();
             }
             return CreatedAtAction(nameof(GetKursById), new { id = createdKurs.Id }, createdKurs);
+        }
+
+        [HttpPut("id")]
+        public async Task<IActionResult> UpdateKurs(int id, [FromBody] KursUpdateDto kurs)
+        {
+            var updatedKurs = await _kursRepository.UpdateKursAsync(id, kurs);
+            if(updatedKurs == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedKurs);
+        }
+
+        [HttpDelete("id")]
+        public async Task<IActionResult> DeleteKursAsync(int id)
+        {
+            var deletedKurs = await _kursRepository.DeleteKursAsync(id);
+            if(deletedKurs == null)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
     }
 }
