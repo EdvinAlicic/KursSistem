@@ -26,6 +26,27 @@ namespace KursSistemDiplomskiRad.Controllers
         public async Task<IActionResult> GetAllKursevi()
         {
             var kursevi = await _kursRepository.GetAllKurseviAsync();
+
+            if (User.IsInRole("Student"))
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+                if (student != null)
+                {
+                    foreach (var kurs in kursevi)
+                    {
+                        var prijavljen = await _dataContext.StudentKurs
+                            .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kurs.Id);
+
+                        if (!prijavljen)
+                        {
+                            kurs.Lekcije = new List<LekcijaDto>();
+                            kurs.Studenti = new List<string>();
+                        }
+                    }
+                }
+            }
             return Ok(kursevi);
         }
 
@@ -38,6 +59,25 @@ namespace KursSistemDiplomskiRad.Controllers
             {
                 return NotFound();
             }
+
+            if (User.IsInRole("Student"))
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+                if(student != null)
+                {
+                    var prijavljen = await _dataContext.StudentKurs
+                        .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kurs.Id);
+
+                    if (!prijavljen)
+                    {
+                        kurs.Lekcije = new List<LekcijaDto>();
+                        kurs.Studenti = new List<string>();
+                    }
+                }
+            }
+
             return Ok(kurs);
         }
 
@@ -94,6 +134,31 @@ namespace KursSistemDiplomskiRad.Controllers
                 return NotFound();
             }
             return Ok(updatedKurs);
+        }
+
+        [HttpDelete("{kursId}/odjava")]
+        public async Task<IActionResult> OdjavaSaKursa(int kursId)
+        {
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var prijava = await _dataContext.StudentKurs
+                .FirstOrDefaultAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
+
+            if(prijava == null)
+            {
+                return NotFound("Niste prijavljeni na ovaj kurs");
+            }
+
+            _dataContext.StudentKurs.Remove(prijava);
+            await _dataContext.SaveChangesAsync();
+
+            return Ok("Uspjesno ste se odjavili sa kursa");
         }
 
         [Authorize(Roles = "Admin")]
