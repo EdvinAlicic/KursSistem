@@ -1,7 +1,11 @@
-﻿using KursSistemDiplomskiRad.DTOs;
+﻿using KursSistemDiplomskiRad.Data;
+using KursSistemDiplomskiRad.DTOs;
+using KursSistemDiplomskiRad.Entities;
 using KursSistemDiplomskiRad.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace KursSistemDiplomskiRad.Controllers
 {
@@ -9,12 +13,15 @@ namespace KursSistemDiplomskiRad.Controllers
     [ApiController]
     public class KursController : ControllerBase
     {
+        private readonly DataContext _dataContext;
         private readonly IKursRepository _kursRepository;
-        public KursController(IKursRepository kursRepository)
+        public KursController(DataContext dataContext, IKursRepository kursRepository)
         {
+            _dataContext = dataContext;
             _kursRepository = kursRepository;
         }
 
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet]
         public async Task<IActionResult> GetAllKursevi()
         {
@@ -22,6 +29,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(kursevi);
         }
 
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet("id")]
         public async Task<IActionResult> GetKursById(int id)
         {
@@ -33,6 +41,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(kurs);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddKurs([FromBody] KursCreateDto kurs)
         {
@@ -44,6 +53,38 @@ namespace KursSistemDiplomskiRad.Controllers
             return CreatedAtAction(nameof(GetKursById), new { id = createdKurs.Id }, createdKurs);
         }
 
+        [Authorize(Roles = "Student")]
+        [HttpPost("{kursId}/prijava")]
+        public async Task<IActionResult> PrijavaNaKurs(int kursId)
+        {
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var postoji = await _dataContext.StudentKurs.AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
+
+            if (postoji)
+            {
+                return BadRequest("Vec ste prijavljeni na ovaj kurs");
+            }
+
+            var prijava = new StudentKurs
+            {
+                StudentId = student.Id,
+                KursId = kursId,
+                DatumPrijave = DateTime.Now,
+                StatusPrijave = "Aktivan"
+            };
+            await _dataContext.StudentKurs.AddAsync(prijava);
+            await _dataContext.SaveChangesAsync();
+            return Ok("Uspjesno ste se prijavili na kurs");
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPut("id")]
         public async Task<IActionResult> UpdateKurs(int id, [FromBody] KursUpdateDto kurs)
         {
@@ -55,6 +96,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(updatedKurs);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("id")]
         public async Task<IActionResult> DeleteKursAsync(int id)
         {
