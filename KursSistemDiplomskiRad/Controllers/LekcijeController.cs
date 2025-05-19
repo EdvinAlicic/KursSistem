@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using KursSistemDiplomskiRad.Entities;
 
 namespace KursSistemDiplomskiRad.Controllers
 {
@@ -74,14 +75,54 @@ namespace KursSistemDiplomskiRad.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> AddLekcijaAsync(int kursId, [FromBody] LekcijaCreateDto lekcijaDto)
+        public async Task<IActionResult> AddLekcijaAsync(int kursId, [FromForm] LekcijaCreateDto lekcijaDto)
         {
-            var createdLekcija = await _lekcijeRepository.AddLekcijaAsync(lekcijaDto, kursId);
-            if(createdLekcija == null)
+            if (lekcijaDto.MedijskiSadrzaj == null || lekcijaDto.MedijskiSadrzaj.Length == 0)
+                return BadRequest("Medijski sadržaj nije dostupan");
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(lekcijaDto.MedijskiSadrzaj.FileName);
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                return BadRequest();
+                await lekcijaDto.MedijskiSadrzaj.CopyToAsync(stream);
             }
-            return Ok(createdLekcija);
+
+            // DTO za repozitorijum (ili entitet) treba MedijskiSadrzaj kao string (putanja)
+            var lekcijaZaRepo = new LekcijaCreateDto
+            {
+                Naziv = lekcijaDto.Naziv,
+                Opis = lekcijaDto.Opis,
+                MedijskiSadrzaj = null // Ne koristi više, ali možeš napraviti novi DTO/entitet
+            };
+
+            // Ručno kreiraj entitet
+            var lekcijaEntity = new Lekcije
+            {
+                Naziv = lekcijaDto.Naziv,
+                Opis = lekcijaDto.Opis,
+                MedijskiSadrzaj = "/uploads/" + fileName,
+                KursId = kursId
+            };
+
+            _dataContext.Lekcije.Add(lekcijaEntity);
+            await _dataContext.SaveChangesAsync();
+
+            // Mapiraj u DTO za ispis
+            var lekcijaZaIspis = new LekcijaDto
+            {
+                Id = lekcijaEntity.Id,
+                Naziv = lekcijaEntity.Naziv,
+                Opis = lekcijaEntity.Opis,
+                MedijskiSadrzaj = lekcijaEntity.MedijskiSadrzaj,
+                KursId = lekcijaEntity.KursId
+            };
+
+            return Ok(lekcijaZaIspis);
         }
 
         [Authorize(Roles = "Admin")]

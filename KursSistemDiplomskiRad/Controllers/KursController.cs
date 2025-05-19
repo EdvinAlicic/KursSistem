@@ -83,31 +83,6 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("student/{studentId}/kursevi")]
-        public async Task<IActionResult> GetKurseviZaStudenta(int studentId)
-        {
-            var prijave = await _dataContext.StudentKurs
-                .Include(sk => sk.Kurs)
-                .Where(sk => sk.StudentId == studentId)
-                .ToListAsync();
-
-            if(prijave == null || prijave.Count == 0)
-            {
-                return NotFound("Student nije prijavljen ni na jedan kurs");
-            }
-
-            var kursevi = prijave.Select(sk => new KursIspisZaStudentaDto
-            {
-                Id = sk.Kurs.Id,
-                Naziv = sk.Kurs.Naziv,
-                Opis = sk.Kurs.Opis,
-                StatusKursa = sk.Kurs.StatusKursa
-            }).ToList();
-
-            return Ok(kursevi);
-        }
-
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddKurs([FromBody] KursCreateDto kurs)
         {
