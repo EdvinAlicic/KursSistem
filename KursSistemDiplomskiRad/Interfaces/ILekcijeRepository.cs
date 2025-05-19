@@ -7,7 +7,7 @@ namespace KursSistemDiplomskiRad.Interfaces
         Task<IEnumerable<LekcijaDto>> GetAllLekcijeAsync(int kursId);
         Task<LekcijaDto> GetLekcijaByIdAsync(int id, int kursId);
         Task<LekcijaDto> AddLekcijaAsync(LekcijaCreateDto lekcija, int kursId);
-        Task<LekcijaDto> UpdateLekcijaAsync(int id, LekcijaDto updatedLekcija, int kursId);
+        Task<LekcijaDto> UpdateLekcijaAsync(int id, LekcijaZaUpdateDto updatedLekcija, int kursId);
         Task<bool> DeleteLekcijaAsync(int id, int kursId);
     }
 }

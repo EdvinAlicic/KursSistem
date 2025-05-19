@@ -10,4 +10,11 @@ namespace KursSistemDiplomskiRad.DTOs
         public string MedijskiSadrzaj { get; set; }
         public int KursId { get; set; } // FK
     }
+
+    public class LekcijaZaUpdateDto
+    {
+        public string Naziv { get; set; }
+        public string Opis { get; set; }
+        public string MedijskiSadrzaj { get; set; }
+    }
 }

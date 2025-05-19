@@ -58,7 +58,7 @@ namespace KursSistemDiplomskiRad.Interfaces
             return _mapper.Map<LekcijaDto>(lekcija);
         }
 
-        public async Task<LekcijaDto> UpdateLekcijaAsync(int id, LekcijaDto updatedLekcija, int kursId)
+        public async Task<LekcijaDto> UpdateLekcijaAsync(int id, LekcijaZaUpdateDto updatedLekcija, int kursId)
         {
             var lekcija = await _dataContext.Lekcije.FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
             if(lekcija == null)

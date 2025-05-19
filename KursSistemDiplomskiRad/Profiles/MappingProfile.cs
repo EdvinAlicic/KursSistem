@@ -23,7 +23,13 @@ namespace KursSistemDiplomskiRad.Profiles
 
             // Kurs -> KursDto
             CreateMap<Kurs, KursDto>()
-                .ForMember(dest => dest.Studenti, opt => opt.MapFrom(src => src.StudentKursevi.Select(sk => sk.Student.Ime + " " + sk.Student.Prezime)))
+                .ForMember(dest => dest.Studenti, opt => opt.MapFrom(src =>
+                    src.StudentKursevi.Select(sk => new StudentOnKursDto
+                    {
+                        Id = sk.Student.Id,
+                        Ime = sk.Student.Ime,
+                        Prezime = sk.Student.Prezime
+                    })))
                 .ForMember(dest => dest.Lekcije, opt => opt.MapFrom(src => src.Lekcije));
 
             // Lekcije -> LekcijaDto
@@ -46,6 +52,8 @@ namespace KursSistemDiplomskiRad.Profiles
 
             // KursUpdateDto -> Kurs (za kreiranje/izmenu)
             CreateMap<KursUpdateDto, Kurs>();
+
+            CreateMap<LekcijaZaUpdateDto, Lekcije>();
         }
     }
 }

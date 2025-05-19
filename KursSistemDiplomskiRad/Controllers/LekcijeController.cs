@@ -86,7 +86,7 @@ namespace KursSistemDiplomskiRad.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateLekcijaAsync(int id, int kursId, [FromBody] LekcijaDto lekcijaDto)
+        public async Task<IActionResult> UpdateLekcijaAsync(int id, int kursId, [FromBody] LekcijaZaUpdateDto lekcijaDto)
         {
             var updatedLekcija = await _lekcijeRepository.UpdateLekcijaAsync(id, lekcijaDto, kursId);
             if(updatedLekcija == null)

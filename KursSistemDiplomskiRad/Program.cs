@@ -60,6 +60,7 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("KursSistemConnection")));
 builder.Services.AddScoped<IKursRepository, KursRepository>();
 builder.Services.AddScoped<ILekcijeRepository, LekcijeRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
 var app = builder.Build();
 

@@ -3,6 +3,7 @@ using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Entities;
 using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ namespace KursSistemDiplomskiRad.Controllers
                         if (!prijavljen)
                         {
                             kurs.Lekcije = new List<LekcijaDto>();
-                            kurs.Studenti = new List<string>();
+                            kurs.Studenti = new List<StudentOnKursDto>();
                         }
                     }
                 }
@@ -73,12 +74,37 @@ namespace KursSistemDiplomskiRad.Controllers
                     if (!prijavljen)
                     {
                         kurs.Lekcije = new List<LekcijaDto>();
-                        kurs.Studenti = new List<string>();
+                        kurs.Studenti = new List<StudentOnKursDto>();
                     }
                 }
             }
 
             return Ok(kurs);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("student/{studentId}/kursevi")]
+        public async Task<IActionResult> GetKurseviZaStudenta(int studentId)
+        {
+            var prijave = await _dataContext.StudentKurs
+                .Include(sk => sk.Kurs)
+                .Where(sk => sk.StudentId == studentId)
+                .ToListAsync();
+
+            if(prijave == null || prijave.Count == 0)
+            {
+                return NotFound("Student nije prijavljen ni na jedan kurs");
+            }
+
+            var kursevi = prijave.Select(sk => new KursIspisZaStudentaDto
+            {
+                Id = sk.Kurs.Id,
+                Naziv = sk.Kurs.Naziv,
+                Opis = sk.Kurs.Opis,
+                StatusKursa = sk.Kurs.StatusKursa
+            }).ToList();
+
+            return Ok(kursevi);
         }
 
         [Authorize(Roles = "Admin")]
