@@ -127,14 +127,44 @@ namespace KursSistemDiplomskiRad.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateLekcijaAsync(int id, int kursId, [FromBody] LekcijaZaUpdateDto lekcijaDto)
+        public async Task<IActionResult> UpdateLekcijaAsync(int id, int kursId, [FromForm] LekcijaZaUpdateDto lekcijaDto)
         {
-            var updatedLekcija = await _lekcijeRepository.UpdateLekcijaAsync(id, lekcijaDto, kursId);
-            if(updatedLekcija == null)
-            {
+            var lekcija = await _dataContext.Lekcije.FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
+            if (lekcija == null)
                 return NotFound();
+
+            lekcija.Naziv = lekcijaDto.Naziv;
+            lekcija.Opis = lekcijaDto.Opis;
+
+            if (lekcijaDto.MedijskiSadrzaj != null && lekcijaDto.MedijskiSadrzaj.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(lekcijaDto.MedijskiSadrzaj.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await lekcijaDto.MedijskiSadrzaj.CopyToAsync(stream);
+                }
+
+                lekcija.MedijskiSadrzaj = "/uploads/" + fileName;
             }
-            return Ok(updatedLekcija);
+
+            await _dataContext.SaveChangesAsync();
+
+            var lekcijaZaIspis = new LekcijaDto
+            {
+                Id = lekcija.Id,
+                Naziv = lekcija.Naziv,
+                Opis = lekcija.Opis,
+                MedijskiSadrzaj = lekcija.MedijskiSadrzaj,
+                KursId = lekcija.KursId
+            };
+
+            return Ok(lekcijaZaIspis);
         }
 
         [Authorize(Roles = "Admin")]

@@ -16,10 +16,12 @@ namespace KursSistemDiplomskiRad.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IKursRepository _kursRepository;
-        public KursController(DataContext dataContext, IKursRepository kursRepository)
+        private readonly IKursOcjenaRepository _kursOcjenaRepository;
+        public KursController(DataContext dataContext, IKursRepository kursRepository, IKursOcjenaRepository kursOcjenaRepository)
         {
             _dataContext = dataContext;
             _kursRepository = kursRepository;
+            _kursOcjenaRepository = kursOcjenaRepository;
         }
 
         [Authorize(Roles = "Admin, Student")]
@@ -28,7 +30,15 @@ namespace KursSistemDiplomskiRad.Controllers
         {
             var kursevi = await _kursRepository.GetAllKurseviAsync();
 
-            if (User.IsInRole("Student"))
+            foreach(var kurs in kursevi)
+            {
+                kurs.ProsjecnaOcjena = await _dataContext.Set<KursOcjena>()
+                    .Where(o => o.KursId == kurs.Id)
+                    .Select(o => (float?)o.Ocjena)
+                    .AverageAsync();
+            }
+
+            /*if (User.IsInRole("Student"))
             {
                 var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
                 var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
@@ -47,7 +57,8 @@ namespace KursSistemDiplomskiRad.Controllers
                         }
                     }
                 }
-            }
+            }*/
+
             return Ok(kursevi);
         }
 
@@ -92,6 +103,43 @@ namespace KursSistemDiplomskiRad.Controllers
                 return BadRequest();
             }
             return CreatedAtAction(nameof(GetKursById), new { id = createdKurs.Id }, createdKurs);
+        }
+
+        [Authorize(Roles = "Student")]
+        [HttpPost("{kursId}/ocjena")]
+        public async Task<IActionResult> DodajOcjenu(int kursId, [FromBody] KursOcjenaDto kursOcjenaDto)
+        {
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var dodanaOcjena = await _kursOcjenaRepository.DodajOcjenuAsync(student.Id, kursId, kursOcjenaDto);
+            if (!dodanaOcjena)
+            {
+                return BadRequest("Niste prijavljeni na kurs ili ste ga vec ocijenili");
+            }
+
+            return Ok("Ocjena je uspjesno dodana");
+        }
+
+        [Authorize(Roles = "Admin, Student")]
+        [HttpGet("{kursId}/SveOcjene")]
+        public async Task<IActionResult> GetOcjeneZaKurs(int kursId)
+        {
+            var ocjene = await _kursOcjenaRepository.GetOcjeneZaKursAsync(kursId);
+            return Ok(ocjene);
+        }
+
+        [Authorize(Roles = "Admin, Student")]
+        [HttpGet("{kursId}/ocjena")]
+        public async Task<IActionResult> GetProsjecnaOcjena(int kursId)
+        {
+            var prosjek = await _kursOcjenaRepository.GetProsjecnaOcjenaAsync(kursId);
+            return Ok(prosjek ?? 0);
         }
 
         [Authorize(Roles = "Student")]

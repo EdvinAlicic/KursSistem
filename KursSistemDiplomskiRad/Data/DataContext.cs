@@ -12,6 +12,7 @@ namespace KursSistemDiplomskiRad.Data
         public DbSet<Entities.Kurs> Kursevi { get; set; }
         public DbSet<Entities.Lekcije> Lekcije { get; set; }
         public DbSet<Entities.StudentKurs> StudentKurs { get; set; }
+        public DbSet<Entities.KursOcjena> KursOcjene { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Entities.StudentKurs>()

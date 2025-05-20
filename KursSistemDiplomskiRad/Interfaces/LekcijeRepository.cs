@@ -67,7 +67,6 @@ namespace KursSistemDiplomskiRad.Interfaces
             }
             lekcija.Naziv = updatedLekcija.Naziv;
             lekcija.Opis = updatedLekcija.Opis;
-            lekcija.MedijskiSadrzaj = updatedLekcija.MedijskiSadrzaj;
             await _dataContext.SaveChangesAsync();
             return _mapper.Map<LekcijaDto>(lekcija);
         }

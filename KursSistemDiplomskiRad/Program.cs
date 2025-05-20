@@ -61,6 +61,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddScoped<IKursRepository, KursRepository>();
 builder.Services.AddScoped<ILekcijeRepository, LekcijeRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IKursOcjenaRepository, KursOcjenaRepository>();
 
 var app = builder.Build();
 

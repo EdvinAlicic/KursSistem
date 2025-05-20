@@ -18,9 +18,9 @@ namespace KursSistemDiplomskiRad.Interfaces
         public async Task<IEnumerable<KursDto>> GetAllKurseviAsync()
         {
             var kursevi = await _dataContext.Kursevi
-                .Include(k => k.Lekcije)
-                .Include(k => k.StudentKursevi)
-                    .ThenInclude(sk => sk.Student)
+                //.Include(k => k.Lekcije)
+                //.Include(k => k.StudentKursevi)
+                    //.ThenInclude(sk => sk.Student)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<KursDto>>(kursevi);
         }
