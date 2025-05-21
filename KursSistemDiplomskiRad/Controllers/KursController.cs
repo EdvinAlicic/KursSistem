@@ -30,6 +30,25 @@ namespace KursSistemDiplomskiRad.Controllers
         {
             var kursevi = await _kursRepository.GetAllKurseviAsync();
 
+            if (User.IsInRole("Student"))
+            {
+                var aktivniKursevi = kursevi.Where(k => k.StatusKursa == 1).ToList();
+
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+                if (student != null)
+                {
+                    foreach (var kurs in aktivniKursevi)
+                    {
+                        var prijavljen = await _dataContext.StudentKurs
+                            .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kurs.Id);
+                    }
+                }
+
+                return Ok(aktivniKursevi);
+            }
+
             foreach(var kurs in kursevi)
             {
                 kurs.ProsjecnaOcjena = await _dataContext.Set<KursOcjena>()
@@ -154,7 +173,20 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Unauthorized();
             }
 
-            var postoji = await _dataContext.StudentKurs.AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
+            var kurs = await _dataContext.Kursevi.FindAsync(kursId);
+
+            if(kurs == null)
+            {
+                return NotFound("Kurs ne postoji");
+            }
+
+            if(kurs.StatusKursa != 1)
+            {
+                return BadRequest("Kurs nije aktivan");
+            }
+
+            var postoji = await _dataContext.StudentKurs
+                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
 
             if (postoji)
             {
