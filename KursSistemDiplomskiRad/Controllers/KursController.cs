@@ -166,43 +166,22 @@ namespace KursSistemDiplomskiRad.Controllers
         public async Task<IActionResult> PrijavaNaKurs(int kursId)
         {
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+            var student = await _dataContext.Studenti
+                .FirstOrDefaultAsync(s => s.Email == email);
 
             if(student == null)
             {
                 return Unauthorized();
             }
 
-            var kurs = await _dataContext.Kursevi.FindAsync(kursId);
+            var rezultat = await _kursRepository.PrijavaNaKurs(student.Id, kursId);
 
-            if(kurs == null)
+            if(rezultat == "Uspjesno ste se prijavili na kurs")
             {
-                return NotFound("Kurs ne postoji");
+                return Ok(rezultat);
             }
 
-            if(kurs.StatusKursa != 1)
-            {
-                return BadRequest("Kurs nije aktivan");
-            }
-
-            var postoji = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-
-            if (postoji)
-            {
-                return BadRequest("Vec ste prijavljeni na ovaj kurs");
-            }
-
-            var prijava = new StudentKurs
-            {
-                StudentId = student.Id,
-                KursId = kursId,
-                DatumPrijave = DateTime.Now,
-                StatusPrijave = "Aktivan"
-            };
-            await _dataContext.StudentKurs.AddAsync(prijava);
-            await _dataContext.SaveChangesAsync();
-            return Ok("Uspjesno ste se prijavili na kurs");
+            return BadRequest(rezultat);
         }
 
         [Authorize(Roles = "Admin")]
@@ -228,18 +207,14 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Unauthorized();
             }
 
-            var prijava = await _dataContext.StudentKurs
-                .FirstOrDefaultAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
+            var rezultat = await _kursRepository.OdjavaSaKursa(student.Id, kursId);
 
-            if(prijava == null)
+            if(rezultat == "Uspjesno ste se odjavili sa kursa")
             {
-                return NotFound("Niste prijavljeni na ovaj kurs");
+                return Ok(rezultat);
             }
 
-            _dataContext.StudentKurs.Remove(prijava);
-            await _dataContext.SaveChangesAsync();
-
-            return Ok("Uspjesno ste se odjavili sa kursa");
+            return NotFound(rezultat);
         }
 
         [Authorize(Roles = "Admin")]

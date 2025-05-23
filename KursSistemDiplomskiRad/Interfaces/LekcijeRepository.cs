@@ -15,17 +15,38 @@ namespace KursSistemDiplomskiRad.Interfaces
             _dataContext = dataContext;
             _mapper = mapper;
         }
-        public async Task<LekcijaDto> AddLekcijaAsync(LekcijaCreateDto lekcija, int kursId)
+        public async Task<LekcijaDto> AddLekcijaAsync(LekcijaCreateDto lekcijaDto, int kursId)
         {
-            var kurs = await _dataContext.Kursevi.FindAsync(kursId);
-            if(kurs == null)
-            {
+            if (lekcijaDto.MedijskiSadrzaj == null || lekcijaDto.MedijskiSadrzaj.Length == 0)
                 return null;
+
+            var kurs = await _dataContext.Kursevi.FindAsync(kursId);
+            if (kurs == null)
+                return null;
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(lekcijaDto.MedijskiSadrzaj.FileName);
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await lekcijaDto.MedijskiSadrzaj.CopyToAsync(stream);
             }
-            var lekcijaEntity = _mapper.Map<Lekcije>(lekcija);
-            lekcijaEntity.KursId = kursId;
+
+            var lekcijaEntity = new Lekcije
+            {
+                Naziv = lekcijaDto.Naziv,
+                Opis = lekcijaDto.Opis,
+                MedijskiSadrzaj = "/uploads/" + fileName,
+                KursId = kursId
+            };
+
             await _dataContext.Lekcije.AddAsync(lekcijaEntity);
             await _dataContext.SaveChangesAsync();
+
             return _mapper.Map<LekcijaDto>(lekcijaEntity);
         }
 
@@ -58,16 +79,34 @@ namespace KursSistemDiplomskiRad.Interfaces
             return _mapper.Map<LekcijaDto>(lekcija);
         }
 
-        public async Task<LekcijaDto> UpdateLekcijaAsync(int id, LekcijaZaUpdateDto updatedLekcija, int kursId)
+        public async Task<LekcijaDto> UpdateLekcijaAsync(int id, LekcijaZaUpdateDto lekcijaDto, int kursId)
         {
             var lekcija = await _dataContext.Lekcije.FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
-            if(lekcija == null)
-            {
+            if (lekcija == null)
                 return null;
+
+            lekcija.Naziv = lekcijaDto.Naziv;
+            lekcija.Opis = lekcijaDto.Opis;
+
+            if (lekcijaDto.MedijskiSadrzaj != null && lekcijaDto.MedijskiSadrzaj.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(lekcijaDto.MedijskiSadrzaj.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await lekcijaDto.MedijskiSadrzaj.CopyToAsync(stream);
+                }
+
+                lekcija.MedijskiSadrzaj = "/uploads/" + fileName;
             }
-            lekcija.Naziv = updatedLekcija.Naziv;
-            lekcija.Opis = updatedLekcija.Opis;
+
             await _dataContext.SaveChangesAsync();
+
             return _mapper.Map<LekcijaDto>(lekcija);
         }
     }

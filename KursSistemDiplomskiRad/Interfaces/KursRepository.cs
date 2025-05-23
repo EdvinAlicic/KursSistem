@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
+using KursSistemDiplomskiRad.Entities;
 using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -86,6 +87,62 @@ namespace KursSistemDiplomskiRad.Interfaces
             {
                 throw ex;
             }
+        }
+
+        public async Task<string> PrijavaNaKurs(int studentId, int kursId)
+        {
+            var student = await _dataContext.Studenti.FindAsync(studentId);
+            var kurs = await _dataContext.Kursevi.FindAsync(kursId);
+
+            if(student == null)
+            {
+                return "Student ne postoji";
+            }
+
+            if(kurs == null)
+            {
+                return "Kurs ne postoji";
+            }
+
+            if(kurs.StatusKursa != 1)
+            {
+                return "Kurs nije aktivan";
+            }
+
+            var postoji = await _dataContext.StudentKurs
+                .AnyAsync(sk => sk.StudentId == studentId && sk.KursId == kursId);
+
+            if (postoji)
+            {
+                return "Vec ste prijavljeni na ovaj kurs";
+            }
+
+            var prijava = new StudentKurs
+            {
+                StudentId = studentId,
+                KursId = kursId,
+                DatumPrijave = DateTime.Now,
+                StatusPrijave = "Aktivan"
+            };
+
+            await _dataContext.StudentKurs.AddAsync(prijava);
+            await _dataContext.SaveChangesAsync();
+            return "Uspjesno ste se prijavili na kurs";
+        }
+
+        public async Task<string> OdjavaSaKursa(int studentId, int kursId)
+        {
+            var prijava = await _dataContext.StudentKurs
+                .FirstOrDefaultAsync(sk => sk.StudentId == studentId && sk.KursId == kursId);
+
+            if (prijava == null)
+            {
+                return "Niste prijavljeni na ovaj kurs";
+            }
+
+            _dataContext.StudentKurs.Remove(prijava);
+            await _dataContext.SaveChangesAsync();
+            return "Uspjesno ste se odjavili sa kursa";
         }
     }
 }
