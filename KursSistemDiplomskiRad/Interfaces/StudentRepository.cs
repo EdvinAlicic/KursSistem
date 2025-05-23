@@ -96,5 +96,23 @@ namespace KursSistemDiplomskiRad.Interfaces
             await _dataContext.SaveChangesAsync();
             return true;
         }
+
+        public async Task<IEnumerable<StudentOnKursDto>> IspisStudenataNaKursu(int kursId)
+        {
+            var studentiNaKursu = _dataContext.StudentKurs
+                .Include(sk => sk.Student)
+                .Where(sk => sk.KursId == kursId)
+                .Select(sk => new StudentOnKursDto
+                {
+                    Id = sk.Student.Id,
+                    Ime = sk.Student.Ime,
+                    Prezime = sk.Student.Prezime,
+                    Email = sk.Student.Email,
+                    DatumPrijave = sk.DatumPrijave,
+                    StatusPrijave = sk.StatusPrijave
+                });
+
+            return await studentiNaKursu.ToListAsync();
+        }
     }
 }

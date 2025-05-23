@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace KursSistemDiplomskiRad.Controllers
 {
@@ -10,8 +12,10 @@ namespace KursSistemDiplomskiRad.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
+        private readonly DataContext _dataContext;
         private readonly IStudentRepository _studentRepository;
-        public StudentController(IStudentRepository studentRepository) {
+        public StudentController(DataContext dataContext, IStudentRepository studentRepository) {
+            _dataContext = dataContext;
             _studentRepository = studentRepository;
         }
 
@@ -33,6 +37,41 @@ namespace KursSistemDiplomskiRad.Controllers
                 return NotFound(kursevi);
             }
             return Ok(kursevi);
+        }
+
+        [Authorize(Roles = "Admin, Student")]
+        [HttpGet("GetStudentiNaKursu/{kursId}")]
+        public async Task<IActionResult> GetStudentiNaKursu(int kursId)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                await _studentRepository.IspisStudenataNaKursu(kursId);
+            }
+
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            var prijavljen = await _dataContext.StudentKurs
+                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            if (!prijavljen)
+            {
+                return Unauthorized("Niste prijavljeni na ovaj kurs");
+            }
+
+            var studentiNaKursu = await _studentRepository.IspisStudenataNaKursu(kursId);
+
+            if(studentiNaKursu == null || !studentiNaKursu.Any())
+            {
+                return NotFound("Nema studenata na ovom kursu");
+            }
+
+            return Ok(studentiNaKursu);
         }
 
         [Authorize(Roles = "Admin")]
