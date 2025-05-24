@@ -24,7 +24,7 @@ namespace KursSistemDiplomskiRad.Controllers
             _kursOcjenaRepository = kursOcjenaRepository;
         }
 
-        [Authorize(Roles = "Admin, Student")]
+        //[Authorize(Roles = "Admin, Student")]
         [HttpGet]
         public async Task<IActionResult> GetAllKursevi()
         {
@@ -110,6 +110,30 @@ namespace KursSistemDiplomskiRad.Controllers
             }
 
             return Ok(kurs);
+        }
+
+        [Authorize(Roles = "Admin, Student")]
+        [HttpGet("NeaktivniKursevi")]
+        public async Task<IActionResult> GetNeaktivniKursevi()
+        {
+            if (User.IsInRole("Admin"))
+            {
+                var neaktivniKursevi = await _kursRepository.GetAllNeaktivneKurseve();
+                return Ok(neaktivniKursevi);
+            }
+
+            if (User.IsInRole("Student"))
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+                if(student != null)
+                {
+                    var neaktivniKursevi = await _kursRepository.GetNeaktivneKurseveZaStudenta(student.Id);
+                    return Ok(neaktivniKursevi);
+                }
+            }
+
+            return Ok();
         }
 
         [Authorize(Roles = "Admin")]

@@ -144,5 +144,25 @@ namespace KursSistemDiplomskiRad.Interfaces
             await _dataContext.SaveChangesAsync();
             return "Uspjesno ste se odjavili sa kursa";
         }
+
+        public async Task<IEnumerable<KursDto>> GetAllNeaktivneKurseve()
+        {
+            var neaktivniKursevi = await _dataContext.Kursevi.Where(k => k.StatusKursa == 0).ToListAsync();
+            return _mapper.Map<IEnumerable<KursDto>>(neaktivniKursevi);
+        }
+
+        public async Task<IEnumerable<KursDto>> GetNeaktivneKurseveZaStudenta(int studentId)
+        {
+            var kursId = await _dataContext.StudentKurs
+                .Where(sk => sk.StudentId == studentId)
+                .Select(sk => sk.KursId)
+                .ToListAsync();
+
+            var neaktivniKursevi = await _dataContext.Kursevi
+                .Where(k => k.StatusKursa == 0 && kursId.Contains(k.Id))
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<KursDto>>(neaktivniKursevi);
+        }
     }
 }
