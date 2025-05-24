@@ -29,27 +29,9 @@ namespace KursSistemDiplomskiRad.Controllers
         public async Task<IActionResult> GetAllKursevi()
         {
             var kursevi = await _kursRepository.GetAllKurseviAsync();
+            var aktivniKursevi = kursevi.Where(k => k.StatusKursa == 1).ToList();
 
-            if (User.IsInRole("Student"))
-            {
-                var aktivniKursevi = kursevi.Where(k => k.StatusKursa == 1).ToList();
-
-                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-                var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-                if (student != null)
-                {
-                    foreach (var kurs in aktivniKursevi)
-                    {
-                        var prijavljen = await _dataContext.StudentKurs
-                            .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kurs.Id);
-                    }
-                }
-
-                return Ok(aktivniKursevi);
-            }
-
-            foreach(var kurs in kursevi)
+            foreach (var kurs in aktivniKursevi)
             {
                 kurs.ProsjecnaOcjena = await _dataContext.Set<KursOcjena>()
                     .Where(o => o.KursId == kurs.Id)
@@ -78,7 +60,7 @@ namespace KursSistemDiplomskiRad.Controllers
                 }
             }*/
 
-            return Ok(kursevi);
+            return Ok(aktivniKursevi);
         }
 
         [Authorize(Roles = "Admin, Student")]
@@ -208,7 +190,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return BadRequest(rezultat);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPut("id")]
         public async Task<IActionResult> UpdateKurs(int id, [FromBody] KursUpdateDto kurs)
         {
