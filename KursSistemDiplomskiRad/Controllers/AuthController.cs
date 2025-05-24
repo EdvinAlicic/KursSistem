@@ -19,9 +19,6 @@ namespace KursSistemDiplomskiRad.Controllers
     {
         private readonly DataContext _dataContext;
 
-        private const string AdminEmail = "admin@gmail.com";
-        private const string AdminPassword = "admin123";
-
         public AuthController(DataContext dataContext, IConfiguration config)
         {
             _dataContext = dataContext;
@@ -41,7 +38,8 @@ namespace KursSistemDiplomskiRad.Controllers
                 Prezime = registerDto.Prezime,
                 Email = registerDto.Email,
                 Telefon = registerDto.Telefon,
-                Adresa = registerDto.Adresa
+                Adresa = registerDto.Adresa,
+                Role = "Student"
             };
 
             var hasher = new PasswordHasher<Student>();
@@ -55,29 +53,19 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            string role;
-            if(loginDto.Email == AdminEmail && loginDto.Password == AdminPassword)
-            {
-                role = "Admin";
-            }
-            else
-            {
-                var student = await _dataContext.Studenti
-                    .FirstOrDefaultAsync(s => s.Email == loginDto.Email);
-                if(student == null)
-                {
-                    return Unauthorized("Pogresan email ili lozinka");
-                }
+            var user = await _dataContext.Studenti
+                .FirstOrDefaultAsync(s => s.Email == loginDto.Email);
 
-                var hasher = new PasswordHasher<Student>();
-                var result = hasher.VerifyHashedPassword(student, student.Password, loginDto.Password);
-                if(result != PasswordVerificationResult.Success)
-                {
-                    return Unauthorized("Pogresan email ili lozinka");
-                }
+            if (user == null)
+                return Unauthorized("Pogresan email ili lozinka");
 
-                role = "Student";
-            }
+            var hasher = new PasswordHasher<Student>();
+            var result = hasher.VerifyHashedPassword(user, user.Password, loginDto.Password);
+            if (result != PasswordVerificationResult.Success)
+                return Unauthorized("Pogresan email ili lozinka");
+
+            // Role iz baze (Admin ili Student)
+            var role = user.Role ?? "Student";
 
             var token = GenerateJwtToken(loginDto.Email, role);
             return Ok(new { token, role });

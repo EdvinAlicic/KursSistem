@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using KursSistemDiplomskiRad.Entities;
 
 namespace KursSistemDiplomskiRad.Data
 {
@@ -8,20 +10,20 @@ namespace KursSistemDiplomskiRad.Data
         {
 
         }
-        public DbSet<Entities.Student> Studenti { get; set; }
-        public DbSet<Entities.Kurs> Kursevi { get; set; }
-        public DbSet<Entities.Lekcije> Lekcije { get; set; }
-        public DbSet<Entities.StudentKurs> StudentKurs { get; set; }
-        public DbSet<Entities.KursOcjena> KursOcjene { get; set; }
+        public DbSet<Student> Studenti { get; set; }
+        public DbSet<Kurs> Kursevi { get; set; }
+        public DbSet<Lekcije> Lekcije { get; set; }
+        public DbSet<StudentKurs> StudentKurs { get; set; }
+        public DbSet<KursOcjena> KursOcjene { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Entities.StudentKurs>()
+            modelBuilder.Entity<StudentKurs>()
                 .HasKey(sc => new { sc.StudentId, sc.KursId });
-            modelBuilder.Entity<Entities.StudentKurs>()
+            modelBuilder.Entity<StudentKurs>()
                 .HasOne(sc => sc.Student)
                 .WithMany(s => s.StudentKursevi)
                 .HasForeignKey(sc => sc.StudentId);
-            modelBuilder.Entity<Entities.StudentKurs>()
+            modelBuilder.Entity<StudentKurs>()
                 .HasOne(sc => sc.Kurs)
                 .WithMany(k => k.StudentKursevi)
                 .HasForeignKey(sc => sc.KursId);

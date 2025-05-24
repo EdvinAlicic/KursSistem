@@ -9,6 +9,7 @@
         public string Password { get; set; }
         public string Telefon { get; set; }
         public string Adresa { get; set; }
+        public string Role { get; set; }
         // Navigacione osobine
         public ICollection<StudentKurs> StudentKursevi { get; set; } = new List<StudentKurs>();
     }

@@ -19,7 +19,10 @@ namespace KursSistemDiplomskiRad.Interfaces
 
         public async Task<IEnumerable<IspisStudenataDto>> GetAllStudentiAsync()
         {
-            var studenti = await _dataContext.Studenti.ToListAsync();
+            var studenti = await _dataContext.Studenti
+                .Where(s => s.Role == "Student")
+                .ToListAsync();
+
             return studenti.Select(s => new IspisStudenataDto
             {
                 Id = s.Id,
