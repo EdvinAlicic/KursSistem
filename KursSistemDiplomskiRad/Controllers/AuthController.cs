@@ -68,8 +68,71 @@ namespace KursSistemDiplomskiRad.Controllers
             var role = user.Role ?? "Student";
 
             var token = GenerateJwtToken(loginDto.Email, role);
-            return Ok(new { token, role });
+
+            var refreshToken = GenerateRefreshToken();
+            var refreshTokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                Expires = DateTime.UtcNow.AddDays(7),
+                IsRevoked = false,
+                StudentId = user.Id
+            };
+
+            _dataContext.RefreshTokens.Add(refreshTokenEntity);
+            await _dataContext.SaveChangesAsync();
+
+            return Ok(new { token, role, refreshToken });
         }
+
+        [HttpPost("refreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            var tokenEntity = await _dataContext.RefreshTokens
+                .Include(rt => rt.Student)
+                .FirstOrDefaultAsync(rt => rt.Token == refreshToken && !rt.IsRevoked && rt.Expires > DateTime.UtcNow);
+
+            if(tokenEntity == null)
+            {
+                return Unauthorized("Neispravan ili istekao refresh token");
+            }
+
+            var user = tokenEntity.Student;
+            var role = user.Role ?? "Student";
+            var newJwt = GenerateJwtToken(user.Email, role);
+
+            tokenEntity.IsRevoked = true;
+            var newRefreshToken = GenerateRefreshToken();
+            var newTokenEntity = new RefreshToken
+            {
+                Token = newRefreshToken,
+                Expires = DateTime.UtcNow.AddDays(7),
+                IsRevoked = false,
+                StudentId = user.Id
+            };
+
+            _dataContext.RefreshTokens.Add(newTokenEntity);
+            await _dataContext.SaveChangesAsync();
+
+            return Ok(new { token = newJwt, refreshToken = newRefreshToken });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] string refreshToken)
+        {
+            var tokenEntity = await _dataContext.RefreshTokens
+                .FirstOrDefaultAsync(rt => rt.Token == refreshToken && !rt.IsRevoked);
+
+            if(tokenEntity == null)
+            {
+                return NotFound("Refresh token ne postoji ili je vec opozvan");
+            }
+
+            tokenEntity.IsRevoked = true;
+            await _dataContext.SaveChangesAsync();
+
+            return Ok("Uspjesno ste se odjavili");
+        }
+
 
         private string GenerateJwtToken(string email, string role)
         {
@@ -87,6 +150,13 @@ namespace KursSistemDiplomskiRad.Controllers
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            System.Security.Cryptography.RandomNumberGenerator.Fill(randomBytes);
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }

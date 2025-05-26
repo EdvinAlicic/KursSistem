@@ -15,6 +15,7 @@ namespace KursSistemDiplomskiRad.Data
         public DbSet<Lekcije> Lekcije { get; set; }
         public DbSet<StudentKurs> StudentKurs { get; set; }
         public DbSet<KursOcjena> KursOcjene { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; } 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<StudentKurs>()
