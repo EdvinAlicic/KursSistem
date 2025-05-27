@@ -54,6 +54,8 @@ namespace KursSistemDiplomskiRad.Profiles
             CreateMap<KursUpdateDto, Kurs>();
 
             CreateMap<LekcijaZaUpdateDto, Lekcije>();
+
+            CreateMap<Kurs, KursBasicDto>();
         }
     }
 }

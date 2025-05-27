@@ -16,17 +16,17 @@ namespace KursSistemDiplomskiRad.Interfaces
             _mapper = mapper;
             _dataContext = dataContext;
         }
-        public async Task<IEnumerable<KursDto>> GetAllKurseviAsync()
+        public async Task<IEnumerable<KursBasicDto>> GetAllKurseviAsync()
         {
             var kursevi = await _dataContext.Kursevi
                 //.Include(k => k.Lekcije)
                 //.Include(k => k.StudentKursevi)
                     //.ThenInclude(sk => sk.Student)
                 .ToListAsync();
-            return _mapper.Map<IEnumerable<KursDto>>(kursevi);
+            return _mapper.Map<IEnumerable<KursBasicDto>>(kursevi);
         }
 
-        public async Task<KursDto> GetKursByIdAsync(int id)
+        public async Task<KursBasicDto> GetKursByIdAsync(int id)
         {
             var kursevi = await _dataContext.Kursevi.FindAsync(id);
             if(kursevi == null)
@@ -34,7 +34,7 @@ namespace KursSistemDiplomskiRad.Interfaces
                 return null;
             }
 
-            return _mapper.Map<KursDto>(kursevi);
+            return _mapper.Map<KursBasicDto>(kursevi);
         }
 
         public async Task<KursDto> AddKursAsync(KursCreateDto kurs)
@@ -145,13 +145,13 @@ namespace KursSistemDiplomskiRad.Interfaces
             return "Uspjesno ste se odjavili sa kursa";
         }
 
-        public async Task<IEnumerable<KursDto>> GetAllNeaktivneKurseve()
+        public async Task<IEnumerable<KursBasicDto>> GetAllNeaktivneKurseve()
         {
             var neaktivniKursevi = await _dataContext.Kursevi.Where(k => k.StatusKursa == 0).ToListAsync();
-            return _mapper.Map<IEnumerable<KursDto>>(neaktivniKursevi);
+            return _mapper.Map<IEnumerable<KursBasicDto>>(neaktivniKursevi);
         }
 
-        public async Task<IEnumerable<KursDto>> GetNeaktivneKurseveZaStudenta(int studentId)
+        public async Task<IEnumerable<KursBasicDto>> GetNeaktivneKurseveZaStudenta(int studentId)
         {
             var kursId = await _dataContext.StudentKurs
                 .Where(sk => sk.StudentId == studentId)
@@ -162,7 +162,7 @@ namespace KursSistemDiplomskiRad.Interfaces
                 .Where(k => k.StatusKursa == 0 && kursId.Contains(k.Id))
                 .ToListAsync();
 
-            return _mapper.Map<IEnumerable<KursDto>>(neaktivniKursevi);
+            return _mapper.Map<IEnumerable<KursBasicDto>>(neaktivniKursevi);
         }
     }
 }

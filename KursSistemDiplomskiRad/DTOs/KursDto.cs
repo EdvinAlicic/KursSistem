@@ -40,4 +40,13 @@
 
         public IFormFile MedijskiSadrzaj { get; set; }
     }
+
+    public class KursBasicDto
+    {
+        public int Id { get; set; }
+        public string Naziv { get; set; }
+        public string Opis { get; set; }
+        public float? ProsjecnaOcjena { get; set; }
+        public int StatusKursa { get; set; }
+    }
 }

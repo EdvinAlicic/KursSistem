@@ -24,7 +24,7 @@ namespace KursSistemDiplomskiRad.Controllers
             _kursOcjenaRepository = kursOcjenaRepository;
         }
 
-        //[Authorize(Roles = "Admin, Student")]
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet]
         public async Task<IActionResult> GetAllKursevi()
         {
@@ -71,24 +71,6 @@ namespace KursSistemDiplomskiRad.Controllers
             if(kurs == null)
             {
                 return NotFound();
-            }
-
-            if (User.IsInRole("Student"))
-            {
-                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-                var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-                if(student != null)
-                {
-                    var prijavljen = await _dataContext.StudentKurs
-                        .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kurs.Id);
-
-                    if (!prijavljen)
-                    {
-                        kurs.Lekcije = new List<LekcijaDto>();
-                        kurs.Studenti = new List<StudentOnKursDto>();
-                    }
-                }
             }
 
             return Ok(kurs);

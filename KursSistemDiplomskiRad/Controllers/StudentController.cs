@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace KursSistemDiplomskiRad.Controllers
 {
@@ -43,9 +44,11 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpGet("GetStudentiNaKursu/{kursId}")]
         public async Task<IActionResult> GetStudentiNaKursu(int kursId)
         {
+            var studentiNaKursu = await _studentRepository.IspisStudenataNaKursu(kursId);
+
             if (User.IsInRole("Admin"))
             {
-                await _studentRepository.IspisStudenataNaKursu(kursId);
+                return Ok(studentiNaKursu);
             }
 
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
@@ -64,9 +67,7 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Unauthorized("Niste prijavljeni na ovaj kurs");
             }
 
-            var studentiNaKursu = await _studentRepository.IspisStudenataNaKursu(kursId);
-
-            if(studentiNaKursu == null || !studentiNaKursu.Any())
+            if(studentiNaKursu == null)
             {
                 return NotFound("Nema studenata na ovom kursu");
             }
