@@ -27,6 +27,12 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
+
+            if (!IsValidEmail(registerDto.Email))
+            {
+                return BadRequest("Neispravan Email");
+            }
+
             if(await _dataContext.Studenti.AnyAsync(s => s.Email == registerDto.Email))
             {
                 return BadRequest("Email vec postoji");
@@ -133,6 +139,16 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok("Uspjesno ste se odjavili");
         }
 
+        private bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return false;
+            }
+
+            var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            return System.Text.RegularExpressions.Regex.IsMatch(email, emailRegex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
 
         private string GenerateJwtToken(string email, string role)
         {
