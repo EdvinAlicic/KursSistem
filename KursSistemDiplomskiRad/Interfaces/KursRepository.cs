@@ -19,9 +19,7 @@ namespace KursSistemDiplomskiRad.Interfaces
         public async Task<IEnumerable<KursBasicDto>> GetAllKurseviAsync()
         {
             var kursevi = await _dataContext.Kursevi
-                //.Include(k => k.Lekcije)
-                //.Include(k => k.StudentKursevi)
-                    //.ThenInclude(sk => sk.Student)
+                .Where(k => k.StatusKursa == 1)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<KursBasicDto>>(kursevi);
         }
@@ -64,7 +62,22 @@ namespace KursSistemDiplomskiRad.Interfaces
             {
                 return null;
             }
-            _mapper.Map(updatedKurs, kursEntity);
+
+            if(updatedKurs.Naziv != null)
+            {
+                kursEntity.Naziv = updatedKurs.Naziv;
+            }
+
+            if(updatedKurs.Opis != null)
+            {
+                kursEntity.Opis = updatedKurs.Opis;
+            }
+
+            if (updatedKurs.StatusKursa.HasValue)
+            {
+                kursEntity.StatusKursa = updatedKurs.StatusKursa.Value;
+            }
+
             await _dataContext.SaveChangesAsync();
             return _mapper.Map<KursDto>(kursEntity);
         }

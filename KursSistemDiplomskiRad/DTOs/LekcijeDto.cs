@@ -13,8 +13,8 @@ namespace KursSistemDiplomskiRad.DTOs
 
     public class LekcijaZaUpdateDto
     {
-        public string Naziv { get; set; }
-        public string Opis { get; set; }
-        public IFormFile MedijskiSadrzaj { get; set; } // Promeni tip u IFormFile
+        public string? Naziv { get; set; }
+        public string? Opis { get; set; }
+        public IFormFile? MedijskiSadrzaj { get; set; }
     }
 }

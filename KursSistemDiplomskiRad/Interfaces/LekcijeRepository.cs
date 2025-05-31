@@ -85,8 +85,11 @@ namespace KursSistemDiplomskiRad.Interfaces
             if (lekcija == null)
                 return null;
 
-            lekcija.Naziv = lekcijaDto.Naziv;
-            lekcija.Opis = lekcijaDto.Opis;
+            if (lekcijaDto.Naziv != null)
+                lekcija.Naziv = lekcijaDto.Naziv;
+
+            if (lekcijaDto.Opis != null)
+                lekcija.Opis = lekcijaDto.Opis;
 
             if (lekcijaDto.MedijskiSadrzaj != null && lekcijaDto.MedijskiSadrzaj.Length > 0)
             {

@@ -22,15 +22,7 @@ namespace KursSistemDiplomskiRad.Profiles
                 .ForMember(dest => dest.KursNaziv, opt => opt.MapFrom(src => src.Kurs.Naziv));
 
             // Kurs -> KursDto
-            CreateMap<Kurs, KursDto>()
-                .ForMember(dest => dest.Studenti, opt => opt.MapFrom(src =>
-                    src.StudentKursevi.Select(sk => new StudentOnKursDto
-                    {
-                        Id = sk.Student.Id,
-                        Ime = sk.Student.Ime,
-                        Prezime = sk.Student.Prezime
-                    })))
-                .ForMember(dest => dest.Lekcije, opt => opt.MapFrom(src => src.Lekcije));
+            CreateMap<Kurs, KursDto>();
 
             // Lekcije -> LekcijaDto
             CreateMap<Lekcije, LekcijaDto>();

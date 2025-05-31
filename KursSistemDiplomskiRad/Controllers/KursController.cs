@@ -28,8 +28,7 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllKursevi()
         {
-            var kursevi = await _kursRepository.GetAllKurseviAsync();
-            var aktivniKursevi = kursevi.Where(k => k.StatusKursa == 1).ToList();
+            var aktivniKursevi = await _kursRepository.GetAllKurseviAsync();
 
             foreach (var kurs in aktivniKursevi)
             {
@@ -172,8 +171,8 @@ namespace KursSistemDiplomskiRad.Controllers
             return BadRequest(rezultat);
         }
 
-        //[Authorize(Roles = "Admin")]
-        [HttpPut("id")]
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("id")]
         public async Task<IActionResult> UpdateKurs(int id, [FromBody] KursUpdateDto kurs)
         {
             var updatedKurs = await _kursRepository.UpdateKursAsync(id, kurs);
