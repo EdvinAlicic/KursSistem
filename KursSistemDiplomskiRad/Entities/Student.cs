@@ -10,6 +10,8 @@
         public string Telefon { get; set; }
         public string Adresa { get; set; }
         public string Role { get; set; }
+        public DateTime DatumRegistracije { get; set; }
+        public DateTime? ZadnjaPrijava { get; set; }
         // Navigacione osobine
         public ICollection<StudentKurs> StudentKursevi { get; set; } = new List<StudentKurs>();
     }

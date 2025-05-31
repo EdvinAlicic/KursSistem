@@ -45,7 +45,8 @@ namespace KursSistemDiplomskiRad.Controllers
                 Email = registerDto.Email,
                 Telefon = registerDto.Telefon,
                 Adresa = registerDto.Adresa,
-                Role = "Student"
+                Role = "Student",
+                DatumRegistracije = DateTime.Now
             };
 
             var hasher = new PasswordHasher<Student>();
@@ -79,11 +80,12 @@ namespace KursSistemDiplomskiRad.Controllers
             var refreshTokenEntity = new RefreshToken
             {
                 Token = refreshToken,
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.Now.AddDays(7),
                 IsRevoked = false,
                 StudentId = user.Id
             };
 
+            user.ZadnjaPrijava = DateTime.Now;
             _dataContext.RefreshTokens.Add(refreshTokenEntity);
             await _dataContext.SaveChangesAsync();
 
@@ -111,7 +113,7 @@ namespace KursSistemDiplomskiRad.Controllers
             var newTokenEntity = new RefreshToken
             {
                 Token = newRefreshToken,
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.Now.AddDays(7),
                 IsRevoked = false,
                 StudentId = user.Id
             };

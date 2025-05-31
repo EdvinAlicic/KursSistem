@@ -30,7 +30,9 @@ namespace KursSistemDiplomskiRad.Interfaces
                 Prezime = s.Prezime,
                 Email = s.Email,
                 Telefon = s.Telefon,
-                Adresa = s.Adresa
+                Adresa = s.Adresa,
+                DatumRegistracije = s.DatumRegistracije,
+                ZadnjaPrijava = s.ZadnjaPrijava
             }).ToList();
         }
 
