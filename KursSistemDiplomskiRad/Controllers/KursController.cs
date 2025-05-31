@@ -1,6 +1,7 @@
 ﻿using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Entities;
+using KursSistemDiplomskiRad.Extensions;
 using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -115,7 +116,7 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpPost("{kursId}/ocjena")]
         public async Task<IActionResult> DodajOcjenu(int kursId, [FromBody] KursOcjenaDto kursOcjenaDto)
         {
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var email = User.GetUserEmail();
             var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
 
             if(student == null)
@@ -152,7 +153,7 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpPost("{kursId}/prijava")]
         public async Task<IActionResult> PrijavaNaKurs(int kursId)
         {
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var email = User.GetUserEmail();
             var student = await _dataContext.Studenti
                 .FirstOrDefaultAsync(s => s.Email == email);
 
@@ -186,7 +187,7 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpDelete("{kursId}/odjava")]
         public async Task<IActionResult> OdjavaSaKursa(int kursId)
         {
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var email = User.GetUserEmail();
             var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
 
             if(student == null)

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using KursSistemDiplomskiRad.Entities;
+using KursSistemDiplomskiRad.Extensions;
 
 namespace KursSistemDiplomskiRad.Controllers
 {
@@ -30,7 +31,7 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Ok(await _lekcijeRepository.GetAllLekcijeAsync(kursId));
 
             // Student vidi samo ako je prijavljen
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var email = User.GetUserEmail();
             var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
 
             if (student == null)
@@ -54,7 +55,7 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Ok(await _lekcijeRepository.GetLekcijaByIdAsync(id, kursId));
 
             // Student vidi samo ako je prijavljen
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var email = User.GetUserEmail();
             var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
 
             if (student == null)

@@ -8,11 +8,9 @@ namespace KursSistemDiplomskiRad.Profiles
     {
         public MappingProfile()
         {
-            // Student -> StudentDto
             CreateMap<Student, StudentDto>()
                 .ForMember(dest => dest.Kursevi, opt => opt.MapFrom(src => src.StudentKursevi.Select(sk => sk.Kurs.Naziv)));
 
-            // StudentKurs -> StudentKursDto
             CreateMap<StudentKurs, StudentKursDto>()
                 .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
                 .ForMember(dest => dest.KursId, opt => opt.MapFrom(src => src.KursId))
@@ -21,33 +19,37 @@ namespace KursSistemDiplomskiRad.Profiles
                 .ForMember(dest => dest.StudentIme, opt => opt.MapFrom(src => src.Student.Ime))
                 .ForMember(dest => dest.KursNaziv, opt => opt.MapFrom(src => src.Kurs.Naziv));
 
-            // Kurs -> KursDto
             CreateMap<Kurs, KursDto>();
 
-            // Lekcije -> LekcijaDto
             CreateMap<Lekcije, LekcijaDto>();
 
-            // LekcijaDto -> Lekcije (za kreiranje/izmenu)
             CreateMap<LekcijaDto, Lekcije>();
 
-            // KursDto -> Kurs (za kreiranje/izmenu)
             CreateMap<KursDto, Kurs>();
 
-            // StudentDto -> Student (za kreiranje/izmenu)
             CreateMap<StudentDto, Student>();
 
-            // KursCreateDto -> Kurs (za kreiranje/izmenu)
             CreateMap<KursCreateDto, Kurs>();
 
-            // LekcijaCreateDto -> Lekcije (za kreiranje/izmenu)
             CreateMap<LekcijaCreateDto, Lekcije>();
 
-            // KursUpdateDto -> Kurs (za kreiranje/izmenu)
             CreateMap<KursUpdateDto, Kurs>();
 
             CreateMap<LekcijaZaUpdateDto, Lekcije>();
 
             CreateMap<Kurs, KursBasicDto>();
+
+            CreateMap<Student, IspisStudenataDto>();
+
+            CreateMap<Kurs, KursIspisZaStudentaDto>();
+
+            CreateMap<StudentKurs, StudentOnKursDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Student.Id))
+                .ForMember(dest => dest.Ime, opt => opt.MapFrom(src => src.Student.Ime))
+                .ForMember(dest => dest.Prezime, opt => opt.MapFrom(src => src.Student.Prezime))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Student.Email))
+                .ForMember(dest => dest.DatumPrijave, opt => opt.MapFrom(src => src.DatumPrijave))
+                .ForMember(dest => dest.StatusPrijave, opt => opt.MapFrom(src => src.StatusPrijave));
         }
     }
 }

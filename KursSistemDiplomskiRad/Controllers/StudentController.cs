@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using KursSistemDiplomskiRad.Data;
+using KursSistemDiplomskiRad.DTOs;
+using KursSistemDiplomskiRad.Extensions;
 using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +22,7 @@ namespace KursSistemDiplomskiRad.Controllers
             _studentRepository = studentRepository;
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet("GetAllStudenti")]
         public async Task<IActionResult> GetAllStudenti()
         {
@@ -28,7 +30,33 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(studenti);
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin, Student")]
+        [HttpGet("GetStudentById/{studentId}")]
+        public async Task<IActionResult> GetStudentById(int studentId)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            if(student.Id != studentId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            var studentDto = await _studentRepository.GetStudentById(studentId);
+            if(studentDto == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(studentDto);
+        }
+
+        //[Authorize(Roles = "Admin")]
         [HttpGet("GetKurseviZaStudenta/{studentId}")]
         public async Task<IActionResult> GetKurseviZaStudenta(int studentId)
         {
@@ -40,7 +68,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(kursevi);
         }
 
-        [Authorize(Roles = "Admin, Student")]
+        //[Authorize(Roles = "Admin, Student")]
         [HttpGet("GetStudentiNaKursu/{kursId}")]
         public async Task<IActionResult> GetStudentiNaKursu(int kursId)
         {
@@ -51,16 +79,16 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Ok(studentiNaKursu);
             }
 
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var email = User.GetUserEmail();
             var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
 
             if(student == null)
             {
                 return Unauthorized();
             }
+
+            var prijavljen = await _dataContext.StudentKurs
+                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
 
             if (!prijavljen)
             {
@@ -73,6 +101,32 @@ namespace KursSistemDiplomskiRad.Controllers
             }
 
             return Ok(studentiNaKursu);
+        }
+
+        [Authorize(Roles = "Admin, Student")]
+        [HttpPatch("UpdateStudenta/{studentId}")]
+        public async Task<IActionResult> UpdateStudenta(int studentId, [FromBody] StudentUpdateDto studentUpdateDto)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            if(student.Id != studentId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            var result = await _studentRepository.UpdateStudentAsync(studentId, studentUpdateDto);
+            if (!result)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
         }
 
         [Authorize(Roles = "Admin")]
@@ -88,6 +142,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok("Student je uspjesno dodan na kurs");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("UkloniStudentaSaKursa/{studentId}/{kursId}")]
         public async Task<IActionResult> UkloniStudentaSaKursa(int studentId, int kursId)
         {
@@ -98,6 +153,32 @@ namespace KursSistemDiplomskiRad.Controllers
             }
 
             return Ok("Student je uspjesno uklonjen sa kursa");
+        }
+
+        [Authorize(Roles = "Admin, Student")]
+        [HttpDelete("DeleteStudent/{studentId}")]
+        public async Task<IActionResult> DeleteStudent(int studentId)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            if(student.Id != studentId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            var result = await _studentRepository.DeleteStudentAsync(studentId);
+            if (!result)
+            {
+                return NotFound();
+            }
+
+            return Ok();
         }
     }
 }

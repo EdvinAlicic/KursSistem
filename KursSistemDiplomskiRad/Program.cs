@@ -8,6 +8,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = jwtSettings["Key"];
+var issuer = jwtSettings["Issuer"];
+var audience = jwtSettings["Audience"];
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -20,7 +25,7 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("KursSistemSecretKey1234567890!@#$%^&*()"))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
     };
 });
 

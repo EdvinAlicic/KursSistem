@@ -2,6 +2,7 @@
 using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,17 +24,7 @@ namespace KursSistemDiplomskiRad.Interfaces
                 .Where(s => s.Role == "Student")
                 .ToListAsync();
 
-            return studenti.Select(s => new IspisStudenataDto
-            {
-                Id = s.Id,
-                Ime = s.Ime,
-                Prezime = s.Prezime,
-                Email = s.Email,
-                Telefon = s.Telefon,
-                Adresa = s.Adresa,
-                DatumRegistracije = s.DatumRegistracije,
-                ZadnjaPrijava = s.ZadnjaPrijava
-            }).ToList();
+            return _mapper.Map<IEnumerable<IspisStudenataDto>>(studenti);
         }
 
         public async Task<IEnumerable<KursIspisZaStudentaDto>> IspisKursevaZaStudenta(int studentId)
@@ -48,15 +39,8 @@ namespace KursSistemDiplomskiRad.Interfaces
                 return null;
             }
 
-            var kursevi = prijave.Select(sk => new KursIspisZaStudentaDto
-            {
-                Id = sk.Kurs.Id,
-                Naziv = sk.Kurs.Naziv,
-                Opis = sk.Kurs.Opis,
-                StatusKursa = sk.Kurs.StatusKursa
-            }).ToList();
-
-            return kursevi;
+            var kursevi = prijave.Select(sk => sk.Kurs).ToList();
+            return _mapper.Map<IEnumerable<KursIspisZaStudentaDto>>(kursevi);
         }
 
         public async Task<bool> DodajStudentaNaKurs(int studentId, int kursId)
@@ -104,20 +88,76 @@ namespace KursSistemDiplomskiRad.Interfaces
 
         public async Task<IEnumerable<StudentOnKursDto>> IspisStudenataNaKursu(int kursId)
         {
-            var studentiNaKursu = _dataContext.StudentKurs
+            var studentiNaKursu = await _dataContext.StudentKurs
                 .Include(sk => sk.Student)
                 .Where(sk => sk.KursId == kursId)
-                .Select(sk => new StudentOnKursDto
-                {
-                    Id = sk.Student.Id,
-                    Ime = sk.Student.Ime,
-                    Prezime = sk.Student.Prezime,
-                    Email = sk.Student.Email,
-                    DatumPrijave = sk.DatumPrijave,
-                    StatusPrijave = sk.StatusPrijave
-                });
+                .ToListAsync();
 
-            return await studentiNaKursu.ToListAsync();
+            return _mapper.Map<IEnumerable<StudentOnKursDto>>(studentiNaKursu);
+        }
+
+        public async Task<bool> UpdateStudentAsync(int studentId, StudentUpdateDto studentUpdateDto)
+        {
+            var student = await _dataContext.Studenti.FindAsync(studentId);
+            if (student == null) return false;
+
+            if (studentUpdateDto.Ime != null) student.Ime = studentUpdateDto.Ime;
+            if (studentUpdateDto.Prezime != null) student.Prezime = studentUpdateDto.Prezime;
+            if (studentUpdateDto.Telefon != null) student.Telefon = studentUpdateDto.Telefon;
+            if (studentUpdateDto.Adresa != null) student.Adresa = studentUpdateDto.Adresa;
+            if (studentUpdateDto.Email != null) student.Email = studentUpdateDto.Email;
+
+            if(studentUpdateDto.CurrentPassword != null && studentUpdateDto.NewPassword != null)
+            {
+                var hasher = new PasswordHasher<Student>();
+                var result = hasher.VerifyHashedPassword(student, student.Password, studentUpdateDto.CurrentPassword);
+                if(result == PasswordVerificationResult.Success)
+                {
+                    student.Password = hasher.HashPassword(student, studentUpdateDto.NewPassword);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            await _dataContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IspisStudenataDto> GetStudentById(int studentId)
+        {
+            var student = await _dataContext.Studenti
+                .Include(s => s.StudentKursevi)
+                .FirstOrDefaultAsync(s => s.Id == studentId);
+
+            if(student == null)
+            {
+                return null;
+            }
+
+            return _mapper.Map<IspisStudenataDto>(student);
+        }
+
+        public async Task<bool> DeleteStudentAsync(int studentId)
+        {
+            var student = await _dataContext.Studenti
+                .Include(s => s.StudentKursevi)
+                .FirstOrDefaultAsync(s => s.Id == studentId);
+
+            if(student == null)
+            {
+                return false;
+            }
+
+            _dataContext.StudentKurs.RemoveRange(student.StudentKursevi);
+
+            var tokens = _dataContext.RefreshTokens.Where(rt => rt.StudentId == studentId);
+            _dataContext.RefreshTokens.RemoveRange(tokens);
+
+            _dataContext.Studenti.Remove(student);
+            await _dataContext.SaveChangesAsync();
+            return true;
         }
     }
 }

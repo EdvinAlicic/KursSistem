@@ -1,4 +1,5 @@
 ﻿using KursSistemDiplomskiRad.Entities;
+using Microsoft.Identity.Client;
 
 namespace KursSistemDiplomskiRad.DTOs
 {
@@ -24,5 +25,16 @@ namespace KursSistemDiplomskiRad.DTOs
         public string Adresa { get; set; }
         public DateTime DatumRegistracije { get; set; }
         public DateTime? ZadnjaPrijava { get; set; }
+    }
+
+    public class StudentUpdateDto
+    {
+        public string? Ime { get; set; }
+        public string? Prezime { get; set; }
+        public string? Telefon { get; set; }
+        public string? Adresa { get; set; }
+        public string? Email { get; set; }
+        public string? CurrentPassword { get; set; }
+        public string? NewPassword { get; set; }
     }
 }

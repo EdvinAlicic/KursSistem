@@ -18,10 +18,11 @@ namespace KursSistemDiplomskiRad.Controllers
     public class AuthController : ControllerBase
     {
         private readonly DataContext _dataContext;
-
+        private readonly IConfiguration _config;
         public AuthController(DataContext dataContext, IConfiguration config)
         {
             _dataContext = dataContext;
+            _config = config;
         }
 
         [HttpPost("register")]
@@ -89,12 +90,26 @@ namespace KursSistemDiplomskiRad.Controllers
             _dataContext.RefreshTokens.Add(refreshTokenEntity);
             await _dataContext.SaveChangesAsync();
 
-            return Ok(new { token, role, refreshToken });
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                Expires = DateTimeOffset.Now.AddDays(7),
+                SameSite = SameSiteMode.Strict
+            });
+
+            return Ok(new { token, role });
         }
 
         [HttpPost("refreshToken")]
-        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        public async Task<IActionResult> RefreshToken()
         {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Unauthorized();
+            }
+
             var tokenEntity = await _dataContext.RefreshTokens
                 .Include(rt => rt.Student)
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken && !rt.IsRevoked && rt.Expires > DateTime.UtcNow);
@@ -121,12 +136,21 @@ namespace KursSistemDiplomskiRad.Controllers
             _dataContext.RefreshTokens.Add(newTokenEntity);
             await _dataContext.SaveChangesAsync();
 
-            return Ok(new { token = newJwt, refreshToken = newRefreshToken });
+            Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                Expires = DateTimeOffset.Now.AddDays(7),
+                SameSite = SameSiteMode.Strict,
+            });
+
+            return Ok(new { token = newJwt, role });
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] string refreshToken)
+        public async Task<IActionResult> Logout()
         {
+            var refreshToken = Request.Cookies["refreshToken"];
             var tokenEntity = await _dataContext.RefreshTokens
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken && !rt.IsRevoked);
 
@@ -159,10 +183,14 @@ namespace KursSistemDiplomskiRad.Controllers
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Role, role)
             };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("KursSistemSecretKey1234567890!@#$%^&*()"));
+
+            var jwtSettings = _config.GetSection("Jwt");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
+                issuer: jwtSettings["Issuer"],
+                audience: jwtSettings["Audience"],
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(60),
                 signingCredentials: creds);
