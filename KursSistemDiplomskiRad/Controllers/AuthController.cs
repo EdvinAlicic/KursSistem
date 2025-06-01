@@ -75,7 +75,7 @@ namespace KursSistemDiplomskiRad.Controllers
             // Role iz baze (Admin ili Student)
             var role = user.Role ?? "Student";
 
-            var token = GenerateJwtToken(loginDto.Email, role);
+            var token = GenerateJwtToken(user.Email, role);
 
             var refreshToken = GenerateRefreshToken();
             var refreshTokenEntity = new RefreshToken

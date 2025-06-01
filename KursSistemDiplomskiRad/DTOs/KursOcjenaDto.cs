@@ -13,4 +13,10 @@
         public string ImeStudenta { get; set; }
         public string PrezimeStudenta { get; set; }
     }
+
+    public class KursOcjenaUpdateDto
+    {
+        public int? Ocjena { get; set; }
+        public string? Komentar { get; set; }
+    }
 }

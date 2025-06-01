@@ -64,5 +64,46 @@ namespace KursSistemDiplomskiRad.Interfaces
                     PrezimeStudenta = o.Student.Prezime
                 }).ToListAsync();
         }
+
+        public async Task<bool> UpdateOcjenaAsync(int studentId, int kursId, KursOcjenaUpdateDto kursOcjenaUpdateDto)
+        {
+            var ocjena = await _dataContext.KursOcjene
+                .FirstOrDefaultAsync(o => o.StudentId == studentId && o.KursId == kursId);
+
+            if (ocjena == null)
+            {
+                return false;
+            }
+
+            if (kursOcjenaUpdateDto.Ocjena.HasValue)
+            {
+                ocjena.Ocjena = kursOcjenaUpdateDto.Ocjena.Value;
+            }
+
+            if(kursOcjenaUpdateDto.Komentar != null)
+            {
+                ocjena.Komentar = kursOcjenaUpdateDto.Komentar;
+            }
+
+            ocjena.Datum = DateTime.Now;
+
+            await _dataContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteOcjenaAsync(int studentId, int kursId)
+        {
+            var ocjena = await _dataContext.KursOcjene
+                .FirstOrDefaultAsync(o => o.StudentId == studentId && o.KursId == kursId);
+
+            if(ocjena == null)
+            {
+                return false;
+            }
+
+            _dataContext.KursOcjene.Remove(ocjena);
+            await _dataContext.SaveChangesAsync();
+            return true;
+        }
     }
 }

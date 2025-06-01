@@ -150,6 +150,60 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
+        [HttpPatch("{kursId}/ocjena")]
+        public async Task<IActionResult> UpdateOcjena(int kursId, [FromBody] KursOcjenaUpdateDto kursOcjenaUpdateDto)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var updatedOcjena = await _kursOcjenaRepository.UpdateOcjenaAsync(student.Id, kursId, kursOcjenaUpdateDto);
+
+            if (!updatedOcjena)
+            {
+                return NotFound();
+            }
+
+            var prosjek = await _kursOcjenaRepository.GetProsjecnaOcjenaAsync(kursId);
+
+            return Ok(new
+            {
+                message = "Ocjena je azurirana",
+                prosjecnaOcjena = prosjek ?? 0
+            });
+        }
+
+        [HttpDelete("{kursId}/ocjena")]
+        public async Task<IActionResult> DeleteOcjena(int kursId)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var deletedOcjena = await _kursOcjenaRepository.DeleteOcjenaAsync(student.Id, kursId);
+            if (!deletedOcjena)
+            {
+                return NotFound();
+            }
+
+            var prosjek = await _kursOcjenaRepository.GetProsjecnaOcjenaAsync(kursId);
+
+            return Ok(new
+            {
+                message = "Ocjena je uspjesno obrisana",
+                prosjecnaOcjena = prosjek ?? 0
+            });
+        }
+
+        [Authorize(Roles = "Student")]
         [HttpPost("{kursId}/prijava")]
         public async Task<IActionResult> PrijavaNaKurs(int kursId)
         {
