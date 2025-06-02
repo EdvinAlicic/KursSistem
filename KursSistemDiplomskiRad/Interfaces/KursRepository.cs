@@ -35,29 +35,24 @@ namespace KursSistemDiplomskiRad.Interfaces
             return _mapper.Map<KursBasicDto>(kursevi);
         }
 
-        public async Task<KursDto> AddKursAsync(KursCreateDto kurs)
+        public async Task<KursDto> AddKursAsync(KursCreateDto kursDto)
         {
-            try
+            if (kursDto == null)
             {
-                if(kurs == null)
-                {
-                    throw new ArgumentNullException(nameof(kurs));
-                }
-                var kursEntity = _mapper.Map<Entities.Kurs>(kurs);
-                var createdKurs = await _dataContext.Kursevi.AddAsync(kursEntity);
-                await _dataContext.SaveChangesAsync();
-                var createdKursDto = _mapper.Map<KursDto>(createdKurs.Entity);
-                return createdKursDto;
+                return null;
             }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
+
+            var kursEntity = _mapper.Map<Kurs>(kursDto);
+            var createdKurs = await _dataContext.Kursevi.AddAsync(kursEntity);
+            await _dataContext.SaveChangesAsync();
+            var createdKursDto = _mapper.Map<KursDto>(createdKurs.Entity);
+            return createdKursDto;
         }
 
         public async Task<KursDto> UpdateKursAsync(int id, KursUpdateDto updatedKurs)
         {
             var kursEntity = await _dataContext.Kursevi.FindAsync(id);
+
             if(kursEntity == null)
             {
                 return null;

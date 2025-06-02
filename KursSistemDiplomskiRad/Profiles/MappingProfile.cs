@@ -50,6 +50,13 @@ namespace KursSistemDiplomskiRad.Profiles
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Student.Email))
                 .ForMember(dest => dest.DatumPrijave, opt => opt.MapFrom(src => src.DatumPrijave))
                 .ForMember(dest => dest.StatusPrijave, opt => opt.MapFrom(src => src.StatusPrijave));
+
+            CreateMap<KursOcjenaCreateDto, KursOcjena>();
+            CreateMap<KursOcjena, KursOcjenaDto>();
+            CreateMap<KursOcjena, KursOcjenaPrikazDto>()
+                .ForMember(dest => dest.ImeStudenta, opt => opt.MapFrom(src => src.Student.Ime))
+                .ForMember(dest => dest.PrezimeStudenta, opt => opt.MapFrom(src => src.Student.Prezime))
+                .ForMember(dest => dest.Datum, opt => opt.MapFrom(src => src.Datum));
         }
     }
 }

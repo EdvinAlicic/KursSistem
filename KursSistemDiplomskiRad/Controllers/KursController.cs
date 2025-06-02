@@ -39,27 +39,6 @@ namespace KursSistemDiplomskiRad.Controllers
                     .AverageAsync();
             }
 
-            /*if (User.IsInRole("Student"))
-            {
-                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-                var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-                if (student != null)
-                {
-                    foreach (var kurs in kursevi)
-                    {
-                        var prijavljen = await _dataContext.StudentKurs
-                            .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kurs.Id);
-
-                        if (!prijavljen)
-                        {
-                            kurs.Lekcije = new List<LekcijaDto>();
-                            kurs.Studenti = new List<StudentOnKursDto>();
-                        }
-                    }
-                }
-            }*/
-
             return Ok(aktivniKursevi);
         }
 
@@ -114,7 +93,7 @@ namespace KursSistemDiplomskiRad.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpPost("{kursId}/ocjena")]
-        public async Task<IActionResult> DodajOcjenu(int kursId, [FromBody] KursOcjenaDto kursOcjenaDto)
+        public async Task<IActionResult> DodajOcjenu(int kursId, [FromBody] KursOcjenaCreateDto kursOcjenaCreateDto)
         {
             var email = User.GetUserEmail();
             var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
@@ -124,8 +103,8 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Unauthorized();
             }
 
-            var dodanaOcjena = await _kursOcjenaRepository.DodajOcjenuAsync(student.Id, kursId, kursOcjenaDto);
-            if (!dodanaOcjena)
+            var dodanaOcjena = await _kursOcjenaRepository.DodajOcjenuAsync(student.Id, kursId, kursOcjenaCreateDto);
+            if (dodanaOcjena == null)
             {
                 return BadRequest("Niste prijavljeni na kurs ili ste ga vec ocijenili");
             }
@@ -177,6 +156,7 @@ namespace KursSistemDiplomskiRad.Controllers
             });
         }
 
+        [Authorize(Roles = "Student")]
         [HttpDelete("{kursId}/ocjena")]
         public async Task<IActionResult> DeleteOcjena(int kursId)
         {
@@ -238,6 +218,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(updatedKurs);
         }
 
+        [Authorize(Roles = "Student")]
         [HttpDelete("{kursId}/odjava")]
         public async Task<IActionResult> OdjavaSaKursa(int kursId)
         {

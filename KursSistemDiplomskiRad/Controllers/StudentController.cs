@@ -22,7 +22,7 @@ namespace KursSistemDiplomskiRad.Controllers
             _studentRepository = studentRepository;
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetAllStudenti")]
         public async Task<IActionResult> GetAllStudenti()
         {
@@ -30,7 +30,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(studenti);
         }
 
-        //[Authorize(Roles = "Admin, Student")]
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet("GetStudentById/{studentId}")]
         public async Task<IActionResult> GetStudentById(int studentId)
         {
@@ -56,7 +56,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(studentDto);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetKurseviZaStudenta/{studentId}")]
         public async Task<IActionResult> GetKurseviZaStudenta(int studentId)
         {
@@ -68,7 +68,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(kursevi);
         }
 
-        //[Authorize(Roles = "Admin, Student")]
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet("GetStudentiNaKursu/{kursId}")]
         public async Task<IActionResult> GetStudentiNaKursu(int kursId)
         {
