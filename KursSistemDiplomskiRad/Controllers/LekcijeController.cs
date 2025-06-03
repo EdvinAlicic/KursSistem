@@ -130,6 +130,14 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Unauthorized();
             }
 
+            var prijavljen = await _dataContext.StudentKurs
+                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
+
+            if (!prijavljen)
+            {
+                return Forbid();
+            }
+
             var result = await _studentLekcijaProgressRepository.OznaciLekcijuKaoZavrsenu(student.Id, kursId, id);
             if (!result)
             {
@@ -159,6 +167,14 @@ namespace KursSistemDiplomskiRad.Controllers
             if(student == null)
             {
                 return Unauthorized();
+            }
+
+            var prijavljen = await _dataContext.StudentKurs
+                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
+
+            if (!prijavljen)
+            {
+                return Forbid();
             }
 
             var result = await _studentLekcijaProgressRepository.OpozoviZavrsenuLekciju(student.Id, kursId, id);

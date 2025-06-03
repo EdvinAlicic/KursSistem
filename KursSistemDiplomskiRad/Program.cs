@@ -9,7 +9,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = jwtSettings["Key"];
+var key = jwtSettings["Key"] ?? throw new ArgumentNullException(nameof(jwtSettings), "JWT ne moze biti null");
 var issuer = jwtSettings["Issuer"];
 var audience = jwtSettings["Audience"];
 
