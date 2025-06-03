@@ -19,13 +19,9 @@ namespace KursSistemDiplomskiRad.Profiles
                 .ForMember(dest => dest.StudentIme, opt => opt.MapFrom(src => src.Student.Ime))
                 .ForMember(dest => dest.KursNaziv, opt => opt.MapFrom(src => src.Kurs.Naziv));
 
-            CreateMap<Kurs, KursDto>();
+            CreateMap<Kurs, KursDto>().ReverseMap();
 
-            CreateMap<Lekcije, LekcijaDto>();
-
-            CreateMap<LekcijaDto, Lekcije>();
-
-            CreateMap<KursDto, Kurs>();
+            CreateMap<Lekcije, LekcijaDto>().ReverseMap();
 
             CreateMap<StudentDto, Student>();
 
@@ -57,6 +53,8 @@ namespace KursSistemDiplomskiRad.Profiles
                 .ForMember(dest => dest.ImeStudenta, opt => opt.MapFrom(src => src.Student.Ime))
                 .ForMember(dest => dest.PrezimeStudenta, opt => opt.MapFrom(src => src.Student.Prezime))
                 .ForMember(dest => dest.Datum, opt => opt.MapFrom(src => src.Datum));
+
+            CreateMap<StudentLekcijaProgress, StudentLekcijaProgressDto>();
         }
     }
 }

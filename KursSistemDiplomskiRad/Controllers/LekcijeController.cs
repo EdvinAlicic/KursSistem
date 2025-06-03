@@ -16,10 +16,12 @@ namespace KursSistemDiplomskiRad.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly ILekcijeRepository _lekcijeRepository;
-        public LekcijeController(DataContext dataContext, ILekcijeRepository lekcijeRepository)
+        private readonly IStudentLekcijaProgressRepository _studentLekcijaProgressRepository;
+        public LekcijeController(DataContext dataContext, ILekcijeRepository lekcijeRepository, IStudentLekcijaProgressRepository studentLekcijaProgressRepository)
         {
             _dataContext = dataContext;
             _lekcijeRepository = lekcijeRepository;
+            _studentLekcijaProgressRepository = studentLekcijaProgressRepository;
         }
 
         [Authorize(Roles = "Admin, Student")]
@@ -74,6 +76,38 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(lekcija);
         }
 
+        [Authorize(Roles = "Student")]
+        [HttpGet("progress")]
+        public async Task<IActionResult> GetProgress(int kursId)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var progress = await _studentLekcijaProgressRepository.GetKursProgressZaStudenta(student.Id, kursId);
+            return Ok(progress);
+        }
+
+        [Authorize(Roles = "Student")]
+        [HttpGet("progress/lekcije")]
+        public async Task<IActionResult> GetZavrseneLekcije(int kursId)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var progress = await _studentLekcijaProgressRepository.GetProgressZaLekcije(student.Id, kursId);
+            var zavrseneLekcije = progress.Where(p => p.JeZavrsena).ToList();
+
+            return Ok(zavrseneLekcije);
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddLekcijaAsync(int kursId, [FromForm] LekcijaCreateDto lekcijaDto)
@@ -85,6 +119,26 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(lekcija);
         }
 
+        [Authorize(Roles = "Student")]
+        [HttpPost("{id}/zavrsi")]
+        public async Task<IActionResult> ZavrsiLekciju(int kursId, int id)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _studentLekcijaProgressRepository.OznaciLekcijuKaoZavrsenu(student.Id, kursId, id);
+            if (!result)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateLekcijaAsync(int id, int kursId, [FromForm] LekcijaZaUpdateDto lekcijaDto)
@@ -94,6 +148,26 @@ namespace KursSistemDiplomskiRad.Controllers
                 return NotFound();
 
             return Ok(lekcija);
+        }
+
+        [Authorize(Roles = "Student")]
+        [HttpPatch("{id}/OpozoviZavrsetak")]
+        public async Task<IActionResult> OpozoviZavrsenuLekciju(int kursId, int id)
+        {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _studentLekcijaProgressRepository.OpozoviZavrsenuLekciju(student.Id, kursId, id);
+            if (!result)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
         }
 
         [Authorize(Roles = "Admin")]

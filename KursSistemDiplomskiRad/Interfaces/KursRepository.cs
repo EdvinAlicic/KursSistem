@@ -97,24 +97,14 @@ namespace KursSistemDiplomskiRad.Interfaces
             }
         }
 
-        public async Task<string> PrijavaNaKurs(int studentId, int kursId)
+        public async Task<bool> PrijavaNaKurs(int studentId, int kursId)
         {
             var student = await _dataContext.Studenti.FindAsync(studentId);
             var kurs = await _dataContext.Kursevi.FindAsync(kursId);
 
-            if(student == null)
+            if(student == null || kurs == null || kurs.StatusKursa != 1)
             {
-                return "Student ne postoji";
-            }
-
-            if(kurs == null)
-            {
-                return "Kurs ne postoji";
-            }
-
-            if(kurs.StatusKursa != 1)
-            {
-                return "Kurs nije aktivan";
+                return false;
             }
 
             var postoji = await _dataContext.StudentKurs
@@ -122,7 +112,7 @@ namespace KursSistemDiplomskiRad.Interfaces
 
             if (postoji)
             {
-                return "Vec ste prijavljeni na ovaj kurs";
+                return false;
             }
 
             var prijava = new StudentKurs
@@ -135,22 +125,22 @@ namespace KursSistemDiplomskiRad.Interfaces
 
             await _dataContext.StudentKurs.AddAsync(prijava);
             await _dataContext.SaveChangesAsync();
-            return "Uspjesno ste se prijavili na kurs";
+            return true;
         }
 
-        public async Task<string> OdjavaSaKursa(int studentId, int kursId)
+        public async Task<bool> OdjavaSaKursa(int studentId, int kursId)
         {
             var prijava = await _dataContext.StudentKurs
                 .FirstOrDefaultAsync(sk => sk.StudentId == studentId && sk.KursId == kursId);
 
             if (prijava == null)
             {
-                return "Niste prijavljeni na ovaj kurs";
+                return false;
             }
 
             _dataContext.StudentKurs.Remove(prijava);
             await _dataContext.SaveChangesAsync();
-            return "Uspjesno ste se odjavili sa kursa";
+            return true;
         }
 
         public async Task<IEnumerable<KursBasicDto>> GetAllNeaktivneKurseve()

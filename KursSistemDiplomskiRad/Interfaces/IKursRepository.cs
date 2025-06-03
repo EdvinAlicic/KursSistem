@@ -9,8 +9,8 @@ namespace KursSistemDiplomskiRad.Interfaces
         Task<IEnumerable<KursBasicDto>> GetAllNeaktivneKurseve();
         Task<IEnumerable<KursBasicDto>> GetNeaktivneKurseveZaStudenta(int studentId);
         Task<KursDto> AddKursAsync(KursCreateDto kurs); // Dodaje novi kurs
-        Task<string> PrijavaNaKurs(int studentId, int kursId);
-        Task<string> OdjavaSaKursa(int studentId, int kursId);
+        Task<bool> PrijavaNaKurs(int studentId, int kursId);
+        Task<bool> OdjavaSaKursa(int studentId, int kursId);
         Task<KursDto> UpdateKursAsync(int id, KursUpdateDto kurs); // Ažurira postojeći kurs
         Task<KursDto> DeleteKursAsync(int id); // Briše kurs prema ID-u
     }

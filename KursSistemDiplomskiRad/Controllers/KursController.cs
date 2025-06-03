@@ -92,7 +92,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPost("{kursId}/ocjena")]
+        [HttpPost("{kursId}/AddOcjena")]
         public async Task<IActionResult> DodajOcjenu(int kursId, [FromBody] KursOcjenaCreateDto kursOcjenaCreateDto)
         {
             var email = User.GetUserEmail();
@@ -113,7 +113,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet("{kursId}/SveOcjene")]
+        [HttpGet("{kursId}/GetOcjene")]
         public async Task<IActionResult> GetOcjeneZaKurs(int kursId)
         {
             var ocjene = await _kursOcjenaRepository.GetOcjeneZaKursAsync(kursId);
@@ -121,7 +121,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet("{kursId}/ocjena")]
+        [HttpGet("{kursId}/GetProsjecnaOcjena")]
         public async Task<IActionResult> GetProsjecnaOcjena(int kursId)
         {
             var prosjek = await _kursOcjenaRepository.GetProsjecnaOcjenaAsync(kursId);
@@ -129,7 +129,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPatch("{kursId}/ocjena")]
+        [HttpPatch("{kursId}/UpdateOcjena")]
         public async Task<IActionResult> UpdateOcjena(int kursId, [FromBody] KursOcjenaUpdateDto kursOcjenaUpdateDto)
         {
             var email = User.GetUserEmail();
@@ -157,7 +157,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpDelete("{kursId}/ocjena")]
+        [HttpDelete("{kursId}/DeleteOcjena")]
         public async Task<IActionResult> DeleteOcjena(int kursId)
         {
             var email = User.GetUserEmail();
@@ -198,12 +198,12 @@ namespace KursSistemDiplomskiRad.Controllers
 
             var rezultat = await _kursRepository.PrijavaNaKurs(student.Id, kursId);
 
-            if(rezultat == "Uspjesno ste se prijavili na kurs")
+            if(rezultat)
             {
-                return Ok(rezultat);
+                return Ok();
             }
 
-            return BadRequest(rezultat);
+            return BadRequest();
         }
 
         [Authorize(Roles = "Admin")]
@@ -232,12 +232,12 @@ namespace KursSistemDiplomskiRad.Controllers
 
             var rezultat = await _kursRepository.OdjavaSaKursa(student.Id, kursId);
 
-            if(rezultat == "Uspjesno ste se odjavili sa kursa")
+            if(rezultat)
             {
-                return Ok(rezultat);
+                return Ok();
             }
 
-            return NotFound(rezultat);
+            return NotFound();
         }
 
         [Authorize(Roles = "Admin")]

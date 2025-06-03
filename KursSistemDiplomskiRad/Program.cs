@@ -67,6 +67,7 @@ builder.Services.AddScoped<IKursRepository, KursRepository>();
 builder.Services.AddScoped<ILekcijeRepository, LekcijeRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IKursOcjenaRepository, KursOcjenaRepository>();
+builder.Services.AddScoped<IStudentLekcijaProgressRepository, StudentLekcijaRepository>();
 
 var app = builder.Build();
 
