@@ -25,7 +25,6 @@ namespace KursSistemDiplomskiRad.Controllers
             _kursOcjenaRepository = kursOcjenaRepository;
         }
 
-        [Authorize(Roles = "Admin, Student")]
         [HttpGet]
         public async Task<IActionResult> GetAllKursevi()
         {
@@ -42,7 +41,6 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(aktivniKursevi);
         }
 
-        [Authorize(Roles = "Admin, Student")]
         [HttpGet("id")]
         public async Task<IActionResult> GetKursById(int id)
         {
