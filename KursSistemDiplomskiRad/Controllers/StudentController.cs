@@ -23,7 +23,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("GetAllStudenti")]
+        [HttpGet]
         public async Task<IActionResult> GetAllStudenti()
         {
             var studenti = await _studentRepository.GetAllStudentiAsync();
@@ -31,7 +31,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet("GetStudentById/{studentId}")]
+        [HttpGet("{studentId}")]
         public async Task<IActionResult> GetStudentById(int studentId)
         {
             var email = User.GetUserEmail();
@@ -57,7 +57,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpGet("GetKurseviZaStudenta/{studentId}")]
+        [HttpGet("kursevi/{studentId}")]
         public async Task<IActionResult> GetKurseviZaStudenta(int studentId)
         {
             var kursevi = await _studentRepository.IspisKursevaZaStudenta(studentId);
@@ -69,7 +69,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet("GetStudentiNaKursu/{kursId}")]
+        [HttpGet("studenti-na-kursu/{kursId}")]
         public async Task<IActionResult> GetStudentiNaKursu(int kursId)
         {
             var studentiNaKursu = await _studentRepository.IspisStudenataNaKursu(kursId);
@@ -104,7 +104,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpPatch("UpdateStudenta/{studentId}")]
+        [HttpPatch("{studentId}")]
         public async Task<IActionResult> UpdateStudenta(int studentId, [FromBody] StudentUpdateDto studentUpdateDto)
         {
             var email = User.GetUserEmail();
@@ -130,7 +130,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPost("DodajStudentaNaKurs/{studentId}/{kursId}")]
+        [HttpPost("dodaj/{studentId}/{kursId}")]
         public async Task<IActionResult> DodajStudentaNaKurs(int studentId, int kursId)
         {
             var rezultat = await _studentRepository.DodajStudentaNaKurs(studentId, kursId);
@@ -143,7 +143,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete("UkloniStudentaSaKursa/{studentId}/{kursId}")]
+        [HttpDelete("ukloni/{studentId}/{kursId}")]
         public async Task<IActionResult> UkloniStudentaSaKursa(int studentId, int kursId)
         {
             var rezultat = await _studentRepository.UkloniStudentaSaKursa(studentId, kursId);
@@ -156,7 +156,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpDelete("DeleteStudent/{studentId}")]
+        [HttpDelete("obrisi/{studentId}")]
         public async Task<IActionResult> DeleteStudent(int studentId)
         {
             var email = User.GetUserEmail();

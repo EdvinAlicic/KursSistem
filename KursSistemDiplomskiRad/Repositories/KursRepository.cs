@@ -2,10 +2,11 @@
 using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Entities;
+using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace KursSistemDiplomskiRad.Interfaces
+namespace KursSistemDiplomskiRad.Repositories
 {
     public class KursRepository : IKursRepository
     {

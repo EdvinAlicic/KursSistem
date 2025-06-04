@@ -25,7 +25,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet]
+        [HttpGet("lekcije")]
         public async Task<IActionResult> GetAllLekcijeAsync(int kursId)
         {
             // Admin vidi sve
@@ -159,7 +159,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPatch("{id}/OpozoviZavrsetak")]
+        [HttpPatch("{id}/opozovi-zavrsetak")]
         public async Task<IActionResult> OpozoviZavrsenuLekciju(int kursId, int id)
         {
             var email = User.GetUserEmail();

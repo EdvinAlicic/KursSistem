@@ -2,10 +2,11 @@
 using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Entities;
+using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
-namespace KursSistemDiplomskiRad.Interfaces
+namespace KursSistemDiplomskiRad.Repositories
 {
     public class KursOcjenaRepository : IKursOcjenaRepository
     {

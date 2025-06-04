@@ -25,6 +25,7 @@ namespace KursSistemDiplomskiRad.Controllers
             _kursOcjenaRepository = kursOcjenaRepository;
         }
 
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet]
         public async Task<IActionResult> GetAllKursevi()
         {
@@ -41,6 +42,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(aktivniKursevi);
         }
 
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet("id")]
         public async Task<IActionResult> GetKursById(int id)
         {
@@ -54,7 +56,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet("NeaktivniKursevi")]
+        [HttpGet("neaktivni-kursevi")]
         public async Task<IActionResult> GetNeaktivniKursevi()
         {
             if (User.IsInRole("Admin"))
@@ -90,7 +92,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPost("{kursId}/AddOcjena")]
+        [HttpPost("{kursId}/ocjena")]
         public async Task<IActionResult> DodajOcjenu(int kursId, [FromBody] KursOcjenaCreateDto kursOcjenaCreateDto)
         {
             var email = User.GetUserEmail();
@@ -111,7 +113,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet("{kursId}/GetOcjene")]
+        [HttpGet("{kursId}/ocjene")]
         public async Task<IActionResult> GetOcjeneZaKurs(int kursId)
         {
             var ocjene = await _kursOcjenaRepository.GetOcjeneZaKursAsync(kursId);
@@ -119,7 +121,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet("{kursId}/GetProsjecnaOcjena")]
+        [HttpGet("{kursId}/prosjecna-ocjena")]
         public async Task<IActionResult> GetProsjecnaOcjena(int kursId)
         {
             var prosjek = await _kursOcjenaRepository.GetProsjecnaOcjenaAsync(kursId);
@@ -127,7 +129,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPatch("{kursId}/UpdateOcjena")]
+        [HttpPatch("{kursId}/ocjena")]
         public async Task<IActionResult> UpdateOcjena(int kursId, [FromBody] KursOcjenaUpdateDto kursOcjenaUpdateDto)
         {
             var email = User.GetUserEmail();
@@ -155,7 +157,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpDelete("{kursId}/DeleteOcjena")]
+        [HttpDelete("{kursId}/ocjena")]
         public async Task<IActionResult> DeleteOcjena(int kursId)
         {
             var email = User.GetUserEmail();
@@ -182,7 +184,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPost("{kursId}/prijava")]
+        [HttpPost("{kursId}/prijava-na-kurs")]
         public async Task<IActionResult> PrijavaNaKurs(int kursId)
         {
             var email = User.GetUserEmail();
@@ -217,7 +219,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpDelete("{kursId}/odjava")]
+        [HttpDelete("{kursId}/odjava-sa-kursa")]
         public async Task<IActionResult> OdjavaSaKursa(int kursId)
         {
             var email = User.GetUserEmail();

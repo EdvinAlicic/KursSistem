@@ -2,11 +2,12 @@
 using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Entities;
+using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace KursSistemDiplomskiRad.Interfaces
+namespace KursSistemDiplomskiRad.Repositories
 {
     public class StudentRepository : IStudentRepository
     {
