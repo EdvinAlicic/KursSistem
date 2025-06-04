@@ -25,7 +25,7 @@ namespace KursSistemDiplomskiRad.Controllers
         }
 
         [Authorize(Roles = "Admin, Student")]
-        [HttpGet("lekcije")]
+        [HttpGet]
         public async Task<IActionResult> GetAllLekcijeAsync(int kursId)
         {
             // Admin vidi sve
@@ -132,10 +132,16 @@ namespace KursSistemDiplomskiRad.Controllers
 
             var prijavljen = await _dataContext.StudentKurs
                 .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-
             if (!prijavljen)
             {
                 return Forbid();
+            }
+
+            var lekcija = await _dataContext.Lekcije
+                .FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
+            if(lekcija == null)
+            {
+                return BadRequest();
             }
 
             var result = await _studentLekcijaProgressRepository.OznaciLekcijuKaoZavrsenu(student.Id, kursId, id);
@@ -171,10 +177,16 @@ namespace KursSistemDiplomskiRad.Controllers
 
             var prijavljen = await _dataContext.StudentKurs
                 .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-
             if (!prijavljen)
             {
                 return Forbid();
+            }
+
+            var lekcija = await _dataContext.Lekcije
+                .FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
+            if (lekcija == null)
+            {
+                return BadRequest();
             }
 
             var result = await _studentLekcijaProgressRepository.OpozoviZavrsenuLekciju(student.Id, kursId, id);

@@ -56,15 +56,24 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(studentDto);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet("kursevi/{studentId}")]
         public async Task<IActionResult> GetKurseviZaStudenta(int studentId)
         {
+            var email = User.GetUserEmail();
+            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
+
+            if(student == null)
+            {
+                return Unauthorized();
+            }
+
             var kursevi = await _studentRepository.IspisKursevaZaStudenta(studentId);
             if(kursevi == null || !kursevi.Any())
             {
                 return NotFound(kursevi);
             }
+
             return Ok(kursevi);
         }
 
