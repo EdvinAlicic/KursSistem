@@ -56,7 +56,11 @@ namespace KursSistemDiplomskiRad.Repositories
 
         public async Task<List<KursOcjenaPrikazDto>> GetOcjeneZaKursAsync(int kursId)
         {
-            var ocjene = await _dataContext.KursOcjene.Where(o => o.KursId == kursId).ToListAsync();
+            var ocjene = await _dataContext.KursOcjene
+                .Include(o => o.Student)
+                .Where(o => o.KursId == kursId)
+                .ToListAsync();
+
             return _mapper.Map<List<KursOcjenaPrikazDto>>(ocjene);
         }
 

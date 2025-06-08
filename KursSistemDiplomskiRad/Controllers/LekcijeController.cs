@@ -76,38 +76,6 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(lekcija);
         }
 
-        [Authorize(Roles = "Student")]
-        [HttpGet("progress")]
-        public async Task<IActionResult> GetProgress(int kursId)
-        {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-            if(student == null)
-            {
-                return Unauthorized();
-            }
-
-            var progress = await _studentLekcijaProgressRepository.GetKursProgressZaStudenta(student.Id, kursId);
-            return Ok(progress);
-        }
-
-        [Authorize(Roles = "Student")]
-        [HttpGet("progress/lekcije")]
-        public async Task<IActionResult> GetZavrseneLekcije(int kursId)
-        {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-            if(student == null)
-            {
-                return Unauthorized();
-            }
-
-            var progress = await _studentLekcijaProgressRepository.GetProgressZaLekcije(student.Id, kursId);
-            var zavrseneLekcije = progress.Where(p => p.JeZavrsena).ToList();
-
-            return Ok(zavrseneLekcije);
-        }
-
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddLekcijaAsync(int kursId, [FromForm] LekcijaCreateDto lekcijaDto)
@@ -119,40 +87,6 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok(lekcija);
         }
 
-        [Authorize(Roles = "Student")]
-        [HttpPost("{id}/zavrsi")]
-        public async Task<IActionResult> ZavrsiLekciju(int kursId, int id)
-        {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-            if(student == null)
-            {
-                return Unauthorized();
-            }
-
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-            if (!prijavljen)
-            {
-                return Forbid();
-            }
-
-            var lekcija = await _dataContext.Lekcije
-                .FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
-            if(lekcija == null)
-            {
-                return BadRequest();
-            }
-
-            var result = await _studentLekcijaProgressRepository.OznaciLekcijuKaoZavrsenu(student.Id, kursId, id);
-            if (!result)
-            {
-                return BadRequest();
-            }
-
-            return Ok();
-        }
-
         [Authorize(Roles = "Admin")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateLekcijaAsync(int id, int kursId, [FromForm] LekcijaZaUpdateDto lekcijaDto)
@@ -162,40 +96,6 @@ namespace KursSistemDiplomskiRad.Controllers
                 return NotFound();
 
             return Ok(lekcija);
-        }
-
-        [Authorize(Roles = "Student")]
-        [HttpPatch("{id}/opozovi-zavrsetak")]
-        public async Task<IActionResult> OpozoviZavrsenuLekciju(int kursId, int id)
-        {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-            if(student == null)
-            {
-                return Unauthorized();
-            }
-
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-            if (!prijavljen)
-            {
-                return Forbid();
-            }
-
-            var lekcija = await _dataContext.Lekcije
-                .FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
-            if (lekcija == null)
-            {
-                return BadRequest();
-            }
-
-            var result = await _studentLekcijaProgressRepository.OpozoviZavrsenuLekciju(student.Id, kursId, id);
-            if (!result)
-            {
-                return BadRequest();
-            }
-
-            return Ok();
         }
 
         [Authorize(Roles = "Admin")]
