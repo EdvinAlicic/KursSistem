@@ -1,6 +1,7 @@
 using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.Helpers;
 using KursSistemDiplomskiRad.Interfaces;
+using KursSistemDiplomskiRad.Middleware;
 using KursSistemDiplomskiRad.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -80,6 +81,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

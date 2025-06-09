@@ -71,6 +71,11 @@ namespace KursSistemDiplomskiRad.Repositories
             var progress = await _dataContext.StudentLekcijaProgress
                 .FirstOrDefaultAsync(p => p.StudentId == studentId && p.KursId == kursId && p.LekcijaId == lekcijaId);
 
+            if(progress != null && progress.JeZavrsena)
+            {
+                return false;
+            }
+
             if(progress == null)
             {
                 progress = new StudentLekcijaProgress
