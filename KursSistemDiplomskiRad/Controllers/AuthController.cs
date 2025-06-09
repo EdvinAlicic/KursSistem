@@ -181,7 +181,8 @@ namespace KursSistemDiplomskiRad.Controllers
             var claims = new[]
             {
                 new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.Role, role)
+                new Claim(ClaimTypes.Role, role),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var jwtSettings = _config.GetSection("Jwt");
