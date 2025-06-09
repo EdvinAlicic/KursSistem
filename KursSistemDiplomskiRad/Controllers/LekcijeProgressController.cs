@@ -13,12 +13,10 @@ namespace KursSistemDiplomskiRad.Controllers
     [ApiController]
     public class LekcijeProgressController : ControllerBase
     {
-        private readonly DataContext _dataContext;
         private readonly IStudentLekcijaProgressRepository _studentLekcijaProgressRepository;
         private readonly StudentValidationHelper _studentValidationHelper;
         public LekcijeProgressController(DataContext dataContext, IStudentLekcijaProgressRepository studentLekcijaProgressRepository, StudentValidationHelper studentValidationHelper)
         {
-            _dataContext = dataContext;
             _studentLekcijaProgressRepository = studentLekcijaProgressRepository;
             _studentValidationHelper = studentValidationHelper;
         }

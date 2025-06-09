@@ -18,30 +18,31 @@ namespace KursSistemDiplomskiRad.Repositories
         }
         public async Task<LekcijaDto> AddLekcijaAsync(LekcijaCreateDto lekcijaDto, int kursId)
         {
-            if (lekcijaDto.MedijskiSadrzaj == null || lekcijaDto.MedijskiSadrzaj.Length == 0)
-                return null;
-
             var kurs = await _dataContext.Kursevi.FindAsync(kursId);
             if (kurs == null)
                 return null;
 
+            string? filePath = null;
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
-            var fileName = Guid.NewGuid() + Path.GetExtension(lekcijaDto.MedijskiSadrzaj.FileName);
-            var filePath = Path.Combine(uploadsFolder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            if(lekcijaDto.MedijskiSadrzaj != null && lekcijaDto.MedijskiSadrzaj.Length > 0)
             {
-                await lekcijaDto.MedijskiSadrzaj.CopyToAsync(stream);
+                var fileName = Guid.NewGuid() + Path.GetExtension(lekcijaDto.MedijskiSadrzaj.FileName);
+                filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await lekcijaDto.MedijskiSadrzaj.CopyToAsync(stream);
+                }
             }
 
             var lekcijaEntity = new Lekcije
             {
                 Naziv = lekcijaDto.Naziv,
                 Opis = lekcijaDto.Opis,
-                MedijskiSadrzaj = "/uploads/" + fileName,
+                MedijskiSadrzaj = filePath != null ? "/uploads/" + Path.GetFileName(filePath) : null,
                 KursId = kursId
             };
 

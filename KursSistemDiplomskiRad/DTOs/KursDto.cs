@@ -34,9 +34,9 @@
     public class LekcijaCreateDto
     {
         public string Naziv { get; set; }
-        public string Opis { get; set; }
+        public string? Opis { get; set; }
 
-        public IFormFile MedijskiSadrzaj { get; set; }
+        public IFormFile? MedijskiSadrzaj { get; set; }
     }
 
     public class KursBasicDto
