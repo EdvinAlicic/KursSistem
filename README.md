@@ -27,3 +27,5 @@ Prijava za administratore se vrši korištenjem sljedećih podataka:
 - **Dependency Injection**: Implementirano kroz registraciju servisa u Program.cs, omogućava modularnost i lakšu zamenu implementacija.
 - **AutoMapper**: Koristi se za mapiranje objekata između slojeva aplikacije.
 - **EF Core LINQ Queries**: Za rad sa podacima u bazama koristeći upite zasnovane na LINQ.
+- **Rad sa datotekama**: Koristi se kod lekcija za upload medijskog sadržaja i upravljanje datotekama.
+- **Microsoft SQL Server**: Baza podataka za pohranu podataka.
