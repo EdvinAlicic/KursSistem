@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using KursSistemDiplomskiRad.Entities;
 using KursSistemDiplomskiRad.Extensions;
+using KursSistemDiplomskiRad.Helpers;
 
 namespace KursSistemDiplomskiRad.Controllers
 {
@@ -14,36 +15,26 @@ namespace KursSistemDiplomskiRad.Controllers
     [ApiController]
     public class LekcijeController : ControllerBase
     {
-        private readonly DataContext _dataContext;
         private readonly ILekcijeRepository _lekcijeRepository;
-        private readonly IStudentLekcijaProgressRepository _studentLekcijaProgressRepository;
-        public LekcijeController(DataContext dataContext, ILekcijeRepository lekcijeRepository, IStudentLekcijaProgressRepository studentLekcijaProgressRepository)
+        private readonly StudentValidationHelper _studentValidationHelper;
+        public LekcijeController(ILekcijeRepository lekcijeRepository, StudentValidationHelper studentValidationHelper)
         {
-            _dataContext = dataContext;
             _lekcijeRepository = lekcijeRepository;
-            _studentLekcijaProgressRepository = studentLekcijaProgressRepository;
+            _studentValidationHelper = studentValidationHelper;
         }
 
         [Authorize(Roles = "Admin, Student")]
         [HttpGet]
         public async Task<IActionResult> GetAllLekcijeAsync(int kursId)
         {
-            // Admin vidi sve
             if (User.IsInRole("Admin"))
                 return Ok(await _lekcijeRepository.GetAllLekcijeAsync(kursId));
 
-            // Student vidi samo ako je prijavljen
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-            if (student == null)
-                return Unauthorized();
-
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-
-            if (!prijavljen)
-                return StatusCode(StatusCodes.Status403Forbidden, "Niste prijavljeni na ovaj kurs.");
+            var validationResult = await _studentValidationHelper.ValidateStudent(User, kursId);
+            if (!validationResult.isValid)
+            {
+                return validationResult.ErrorMessage.Contains("Unauthorized") ? Unauthorized(validationResult.ErrorMessage) : Forbid(validationResult.ErrorMessage);
+            }
 
             return Ok(await _lekcijeRepository.GetAllLekcijeAsync(kursId));
         }
@@ -52,22 +43,14 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLekcijaByIdAsync(int kursId, int id)
         {
-            // Admin vidi sve
             if (User.IsInRole("Admin"))
                 return Ok(await _lekcijeRepository.GetLekcijaByIdAsync(id, kursId));
 
-            // Student vidi samo ako je prijavljen
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-            if (student == null)
-                return Unauthorized();
-
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-
-            if (!prijavljen)
-                return StatusCode(StatusCodes.Status403Forbidden, "Niste prijavljeni na ovaj kurs.");
+            var validationResult = await _studentValidationHelper.ValidateStudent(User, kursId);
+            if (!validationResult.isValid)
+            {
+                return validationResult.ErrorMessage.Contains("Unauthorized") ? Unauthorized(validationResult.ErrorMessage) : Forbid(validationResult.ErrorMessage);
+            }
 
             var lekcija = await _lekcijeRepository.GetLekcijaByIdAsync(id, kursId);
             if (lekcija == null)

@@ -1,4 +1,5 @@
 using KursSistemDiplomskiRad.Data;
+using KursSistemDiplomskiRad.Helpers;
 using KursSistemDiplomskiRad.Interfaces;
 using KursSistemDiplomskiRad.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,7 +45,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Unesi 'Bearer {token}' za autentikaciju"
+        Description = "Token"
     });
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -69,6 +70,7 @@ builder.Services.AddScoped<ILekcijeRepository, LekcijeRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IKursOcjenaRepository, KursOcjenaRepository>();
 builder.Services.AddScoped<IStudentLekcijaProgressRepository, StudentLekcijaRepository>();
+builder.Services.AddScoped<StudentValidationHelper>();
 
 var app = builder.Build();
 

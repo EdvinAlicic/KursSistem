@@ -1,5 +1,6 @@
 ﻿using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.Extensions;
+using KursSistemDiplomskiRad.Helpers;
 using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,25 +15,25 @@ namespace KursSistemDiplomskiRad.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IStudentLekcijaProgressRepository _studentLekcijaProgressRepository;
-        public LekcijeProgressController(DataContext dataContext, IStudentLekcijaProgressRepository studentLekcijaProgressRepository)
+        private readonly StudentValidationHelper _studentValidationHelper;
+        public LekcijeProgressController(DataContext dataContext, IStudentLekcijaProgressRepository studentLekcijaProgressRepository, StudentValidationHelper studentValidationHelper)
         {
             _dataContext = dataContext;
             _studentLekcijaProgressRepository = studentLekcijaProgressRepository;
+            _studentValidationHelper = studentValidationHelper;
         }
 
         [Authorize(Roles = "Student")]
         [HttpGet]
         public async Task<IActionResult> GetProgress(int kursId)
         {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-            if(student == null)
+            var validationResult = await _studentValidationHelper.ValidateStudent(User, kursId);
+            if (!validationResult.isValid)
             {
-                return Unauthorized();
+                return validationResult.ErrorMessage.Contains("Unauthorized") ? Unauthorized(validationResult.ErrorMessage) : Forbid(validationResult.ErrorMessage);
             }
 
-            var progress = await _studentLekcijaProgressRepository.GetKursProgressZaStudenta(student.Id, kursId);
+            var progress = await _studentLekcijaProgressRepository.GetKursProgressZaStudenta(validationResult.StudentId, kursId);
             return Ok(progress);
         }
 
@@ -40,14 +41,13 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpGet("lekcije")]
         public async Task<IActionResult> GetZavrseneLekcije(int kursId)
         {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-            if (student == null)
+            var validationResult = await _studentValidationHelper.ValidateStudent(User, kursId);
+            if (!validationResult.isValid)
             {
-                return Unauthorized();
+                return validationResult.ErrorMessage.Contains("Unauthorized") ? Unauthorized(validationResult.ErrorMessage) : Forbid(validationResult.ErrorMessage);
             }
 
-            var progress = await _studentLekcijaProgressRepository.GetProgressZaLekcije(student.Id, kursId);
+            var progress = await _studentLekcijaProgressRepository.GetProgressZaLekcije(validationResult.StudentId, kursId);
             var zavrseneLekcije = progress.Where(p => p.JeZavrsena).ToList();
 
             return Ok(zavrseneLekcije);
@@ -57,28 +57,13 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpPost("zavrsi")]
         public async Task<IActionResult> ZavrsiLekciju(int kursId, int id)
         {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-            if (student == null)
+            var validationResult = await _studentValidationHelper.ValidateStudent(User, kursId);
+            if (!validationResult.isValid)
             {
-                return Unauthorized();
+                return validationResult.ErrorMessage.Contains("Unauthorized") ? Unauthorized(validationResult.ErrorMessage) : Forbid(validationResult.ErrorMessage);
             }
 
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-            if (!prijavljen)
-            {
-                return Forbid();
-            }
-
-            var lekcija = await _dataContext.Lekcije
-                .FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
-            if (lekcija == null)
-            {
-                return BadRequest();
-            }
-
-            var result = await _studentLekcijaProgressRepository.OznaciLekcijuKaoZavrsenu(student.Id, kursId, id);
+            var result = await _studentLekcijaProgressRepository.OznaciLekcijuKaoZavrsenu(validationResult.StudentId, kursId, id);
             if (!result)
             {
                 return BadRequest();
@@ -91,28 +76,13 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpPatch("opozovi-zavrsetak")]
         public async Task<IActionResult> OpozoviZavrsenuLekciju(int kursId, int id)
         {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-            if (student == null)
+            var validationResult = await _studentValidationHelper.ValidateStudent(User, kursId);
+            if (!validationResult.isValid)
             {
-                return Unauthorized();
+                return validationResult.ErrorMessage.Contains("Unauthorized") ? Unauthorized(validationResult.ErrorMessage) : Forbid(validationResult.ErrorMessage);
             }
 
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-            if (!prijavljen)
-            {
-                return Forbid();
-            }
-
-            var lekcija = await _dataContext.Lekcije
-                .FirstOrDefaultAsync(l => l.Id == id && l.KursId == kursId);
-            if (lekcija == null)
-            {
-                return BadRequest();
-            }
-
-            var result = await _studentLekcijaProgressRepository.OpozoviZavrsenuLekciju(student.Id, kursId, id);
+            var result = await _studentLekcijaProgressRepository.OpozoviZavrsenuLekciju(validationResult.StudentId, kursId, id);
             if (!result)
             {
                 return BadRequest();
