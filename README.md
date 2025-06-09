@@ -4,9 +4,10 @@
 
 ### Za korisnike
 - Pregled dostupnih kurseva
-- Registracija na kurs
+- Prijava na kurs
 - Pregled vlastitih kurseva
 - Prijava i registracija korisnika
+- Praćenje napretka kroz kurseve
 
 ### Za administratore
 - Dodavanje, uređivanje i brisanje kurseva
