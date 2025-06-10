@@ -34,6 +34,11 @@ namespace KursSistemDiplomskiRad.Controllers
                 return BadRequest("Neispravan Email");
             }
 
+            if (!IsValidPassword(registerDto.Password))
+            {
+                return BadRequest("Lozinka mora imati najmanje 8 znakova i sadrzavati barem jedan broj");
+            }
+
             if(await _dataContext.Studenti.AnyAsync(s => s.Email == registerDto.Email))
             {
                 return BadRequest("Email vec postoji");
@@ -174,6 +179,16 @@ namespace KursSistemDiplomskiRad.Controllers
 
             var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
             return System.Text.RegularExpressions.Regex.IsMatch(email, emailRegex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
+        private bool IsValidPassword(string password)
+        {
+            if(password.Length < 8 || !password.Any(char.IsDigit))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private string GenerateJwtToken(string email, string role)

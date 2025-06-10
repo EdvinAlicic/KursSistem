@@ -22,6 +22,7 @@ namespace KursSistemDiplomskiRad.Repositories
         public async Task<IEnumerable<IspisStudenataDto>> GetAllStudentiAsync()
         {
             var studenti = await _dataContext.Studenti
+                .AsNoTracking()
                 .Where(s => s.Role == "Student")
                 .ToListAsync();
 

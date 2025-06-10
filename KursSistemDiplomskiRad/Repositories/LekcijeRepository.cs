@@ -66,7 +66,10 @@ namespace KursSistemDiplomskiRad.Repositories
 
         public async Task<IEnumerable<LekcijaDto>> GetAllLekcijeAsync(int kursId)
         {
-            var lekcije = await _dataContext.Lekcije.Where(l => l.KursId == kursId).ToListAsync();
+            var lekcije = await _dataContext.Lekcije
+                .AsNoTracking()
+                .Where(l => l.KursId == kursId)
+                .ToListAsync();
             return _mapper.Map<IEnumerable<LekcijaDto>>(lekcije);
         }
 

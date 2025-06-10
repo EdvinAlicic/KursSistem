@@ -20,6 +20,7 @@ namespace KursSistemDiplomskiRad.Repositories
         public async Task<IEnumerable<KursBasicDto>> GetAllKurseviAsync()
         {
             var kursevi = await _dataContext.Kursevi
+                .AsNoTracking()
                 .Where(k => k.StatusKursa == 1)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<KursBasicDto>>(kursevi);
@@ -80,22 +81,15 @@ namespace KursSistemDiplomskiRad.Repositories
 
         public async Task<KursDto> DeleteKursAsync(int id)
         {
-            try
+            var kursEntity = await _dataContext.Kursevi.FindAsync(id);
+            if (kursEntity == null)
             {
-                var kursEntity = await _dataContext.Kursevi.FindAsync(id);
-                if (kursEntity == null)
-                {
-                    return null;
-                }
-                var deletedKurs = _mapper.Map<KursDto>(kursEntity);
-                _dataContext.Kursevi.Remove(kursEntity);
-                await _dataContext.SaveChangesAsync();
-                return deletedKurs;
+                return null;
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            var deletedKurs = _mapper.Map<KursDto>(kursEntity);
+            _dataContext.Kursevi.Remove(kursEntity);
+            await _dataContext.SaveChangesAsync();
+            return deletedKurs;
         }
 
         public async Task<bool> PrijavaNaKurs(int studentId, int kursId)
