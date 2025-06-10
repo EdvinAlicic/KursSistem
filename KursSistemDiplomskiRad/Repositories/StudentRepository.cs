@@ -2,6 +2,7 @@
 using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Entities;
+using KursSistemDiplomskiRad.Helpers;
 using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -109,8 +110,18 @@ namespace KursSistemDiplomskiRad.Repositories
             if (studentUpdateDto.Adresa != null) student.Adresa = studentUpdateDto.Adresa;
             if (studentUpdateDto.Email != null) student.Email = studentUpdateDto.Email;
 
-            if(studentUpdateDto.CurrentPassword != null && studentUpdateDto.NewPassword != null)
+            if(studentUpdateDto.NewPassword != null)
             {
+                if (!PasswordHelper.IsValidPassword(studentUpdateDto.NewPassword))
+                {
+                    return false;
+                }
+
+                if(studentUpdateDto.CurrentPassword == null)
+                {
+                    return false;
+                }
+
                 var hasher = new PasswordHasher<Student>();
                 var result = hasher.VerifyHashedPassword(student, student.Password, studentUpdateDto.CurrentPassword);
                 if(result == PasswordVerificationResult.Success)
@@ -123,7 +134,7 @@ namespace KursSistemDiplomskiRad.Repositories
                 }
             }
 
-            await _dataContext.SaveChangesAsync();
+                await _dataContext.SaveChangesAsync();
             return true;
         }
 

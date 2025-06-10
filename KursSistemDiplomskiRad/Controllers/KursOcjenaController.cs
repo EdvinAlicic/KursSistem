@@ -75,6 +75,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Student")]
         [HttpDelete]
         public async Task<IActionResult> DeleteOcjena(int kursId)
         {

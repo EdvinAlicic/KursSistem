@@ -2,6 +2,7 @@
 using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Extensions;
+using KursSistemDiplomskiRad.Helpers;
 using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,9 +18,11 @@ namespace KursSistemDiplomskiRad.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IStudentRepository _studentRepository;
-        public StudentController(DataContext dataContext, IStudentRepository studentRepository) {
+        private readonly StudentValidationHelper _studentValidationHelper;
+        public StudentController(DataContext dataContext, IStudentRepository studentRepository, StudentValidationHelper studentValidationHelper) {
             _dataContext = dataContext;
             _studentRepository = studentRepository;
+            _studentValidationHelper = studentValidationHelper;
         }
 
         [Authorize(Roles = "Admin")]
@@ -88,23 +91,13 @@ namespace KursSistemDiplomskiRad.Controllers
                 return Ok(studentiNaKursu);
             }
 
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-            if(student == null)
+            var validationResult = await _studentValidationHelper.ValidateStudent(User, kursId);
+            if (!validationResult.isValid)
             {
-                return Unauthorized();
+                return validationResult.ErrorMessage.Contains("Unauthorized") ? Unauthorized(validationResult.ErrorMessage) : Forbid(validationResult.ErrorMessage);
             }
 
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == student.Id && sk.KursId == kursId);
-
-            if (!prijavljen)
-            {
-                return Unauthorized("Niste prijavljeni na ovaj kurs");
-            }
-
-            if(studentiNaKursu == null)
+            if (studentiNaKursu == null)
             {
                 return NotFound("Nema studenata na ovom kursu");
             }

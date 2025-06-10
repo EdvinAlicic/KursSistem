@@ -17,12 +17,10 @@ namespace KursSistemDiplomskiRad.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IKursRepository _kursRepository;
-        private readonly IKursOcjenaRepository _kursOcjenaRepository;
-        public KursController(DataContext dataContext, IKursRepository kursRepository, IKursOcjenaRepository kursOcjenaRepository)
+        public KursController(DataContext dataContext, IKursRepository kursRepository)
         {
             _dataContext = dataContext;
             _kursRepository = kursRepository;
-            _kursOcjenaRepository = kursOcjenaRepository;
         }
 
         [Authorize(Roles = "Admin, Student")]
@@ -79,6 +77,7 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin, Student")]
         [HttpGet("pretraga")]
         public async Task<IActionResult> SearchKursevi([FromQuery] string searchTerm)
         {
