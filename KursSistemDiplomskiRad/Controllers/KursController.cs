@@ -79,6 +79,23 @@ namespace KursSistemDiplomskiRad.Controllers
             return Ok();
         }
 
+        [HttpGet("pretraga")]
+        public async Task<IActionResult> SearchKursevi([FromQuery] string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return BadRequest("Unesite termin za pretragu");
+            }
+
+            var kursevi = await _kursRepository.SearchKurseviAsync(searchTerm);
+            if (!kursevi.Any())
+            {
+                return NotFound("Nema kurseva koji odgovaraju pretrazi");
+            }
+
+            return Ok(kursevi);
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddKurs([FromBody] KursCreateDto kurs)

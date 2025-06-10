@@ -157,5 +157,15 @@ namespace KursSistemDiplomskiRad.Repositories
 
             return _mapper.Map<IEnumerable<KursBasicDto>>(neaktivniKursevi);
         }
+
+        public async Task<IEnumerable<KursBasicDto>> SearchKurseviAsync(string searchTerm)
+        {
+            var kursevi = await _dataContext.Kursevi
+                .AsNoTracking()
+                .Where(k => EF.Functions.Like(k.Naziv, $"%{searchTerm}%"))
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<KursBasicDto>>(kursevi);
+        }
     }
 }
