@@ -15,7 +15,7 @@ namespace KursSistemDiplomskiRad.Controllers
     {
         private readonly IStudentLekcijaProgressRepository _studentLekcijaProgressRepository;
         private readonly StudentValidationHelper _studentValidationHelper;
-        public LekcijeProgressController(DataContext dataContext, IStudentLekcijaProgressRepository studentLekcijaProgressRepository, StudentValidationHelper studentValidationHelper)
+        public LekcijeProgressController(IStudentLekcijaProgressRepository studentLekcijaProgressRepository, StudentValidationHelper studentValidationHelper)
         {
             _studentLekcijaProgressRepository = studentLekcijaProgressRepository;
             _studentValidationHelper = studentValidationHelper;
