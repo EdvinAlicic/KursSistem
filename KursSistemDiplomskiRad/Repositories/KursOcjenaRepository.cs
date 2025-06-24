@@ -19,14 +19,6 @@ namespace KursSistemDiplomskiRad.Repositories
         }
         public async Task<KursOcjenaDto> DodajOcjenuAsync(int studentId, int kursId, KursOcjenaCreateDto kursOcjenaCreateDto)
         {
-            var prijavljen = await _dataContext.StudentKurs
-                .AnyAsync(sk => sk.StudentId == studentId && sk.KursId == kursId);
-
-            if (!prijavljen)
-            {
-                return null;
-            }
-
             var postoji = await _dataContext.KursOcjene
                 .AnyAsync(o => o.StudentId == studentId && o.KursId == kursId);
 

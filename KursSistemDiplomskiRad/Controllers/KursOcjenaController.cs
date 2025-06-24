@@ -1,6 +1,7 @@
 ﻿using KursSistemDiplomskiRad.Data;
 using KursSistemDiplomskiRad.DTOs;
 using KursSistemDiplomskiRad.Extensions;
+using KursSistemDiplomskiRad.Helpers;
 using KursSistemDiplomskiRad.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,10 +16,12 @@ namespace KursSistemDiplomskiRad.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IKursOcjenaRepository _kursOcjenaRepository;
-        public KursOcjenaController(DataContext dataContext, IKursOcjenaRepository kursOcjenaRepository)
+        private readonly StudentValidationHelper _studentValidationHelper;
+        public KursOcjenaController(DataContext dataContext, IKursOcjenaRepository kursOcjenaRepository, StudentValidationHelper studentValidationHelper)
         {
             _dataContext = dataContext;
             _kursOcjenaRepository = kursOcjenaRepository;
+            _studentValidationHelper = studentValidationHelper;
         }
 
         [Authorize(Roles = "Student, Admin")]
@@ -41,15 +44,13 @@ namespace KursSistemDiplomskiRad.Controllers
         [HttpPost]
         public async Task<IActionResult> DodajOcjenu(int kursId, [FromBody] KursOcjenaCreateDto kursOcjenaDto)
         {
-            var email = User.GetUserEmail();
-            var student = await _dataContext.Studenti.FirstOrDefaultAsync(s => s.Email == email);
-
-            if (student == null)
+            var validationResult = await _studentValidationHelper.ValidateStudent(User, kursId);
+            if (!validationResult.isValid)
             {
-                return Unauthorized();
+                return validationResult.ErrorMessage.Contains("Unauthorized") ? Unauthorized(validationResult.ErrorMessage) : Forbid(validationResult.ErrorMessage);
             }
 
-            var ocjena = await _kursOcjenaRepository.DodajOcjenuAsync(student.Id, kursId, kursOcjenaDto);
+            var ocjena = await _kursOcjenaRepository.DodajOcjenuAsync(validationResult.StudentId, kursId, kursOcjenaDto);
             return CreatedAtAction(nameof(GetOcjeneZaKurs), new { kursId }, ocjena);
         }
 

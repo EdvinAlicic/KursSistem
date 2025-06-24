@@ -85,6 +85,8 @@ namespace KursSistemDiplomskiRad.Controllers
 
             user.ZadnjaPrijava = DateTime.Now;
 
+            await _dataContext.SaveChangesAsync();
+
             return Ok(new { token, role });
         }
 
