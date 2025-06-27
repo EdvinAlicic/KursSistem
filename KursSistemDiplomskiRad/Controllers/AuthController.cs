@@ -85,7 +85,26 @@ namespace KursSistemDiplomskiRad.Controllers
 
             user.ZadnjaPrijava = DateTime.Now;
 
+            var refreshToken = GenerateRefreshToken();
+            var refreshTokenEntity = new RefreshToken
+            {
+                Token = refreshToken,
+                Expires = DateTime.Now.AddDays(7),
+                IsRevoked = false,
+                StudentId = user.Id
+            };
+
+            user.ZadnjaPrijava = DateTime.Now;
+            _dataContext.RefreshTokens.Add(refreshTokenEntity);
             await _dataContext.SaveChangesAsync();
+
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                Expires = DateTimeOffset.Now.AddDays(7),
+                SameSite = SameSiteMode.Strict
+            });
 
             return Ok(new { token, role });
         }
